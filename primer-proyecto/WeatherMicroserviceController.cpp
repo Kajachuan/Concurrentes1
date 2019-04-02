@@ -1,7 +1,5 @@
 #include "WeatherMicroserviceController.h"
 
-#include "City.h"
-
 WeatherMicroserviceController::WeatherMicroserviceController() {
   // Acá se debería abrir el archivo con las ciudades
   cities["Buenos Aires"] = new City("Buenos Aires",0,0,0);
