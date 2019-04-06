@@ -1,14 +1,14 @@
-#ifndef WEATHERMICROSERVICECONTROLLER_H
-#define WEATHERMICROSERVICECONTROLLER_H
+#ifndef WEATHERMICROSERVICE_H_
+#define WEATHERMICROSERVICE_H_
 
 #include <string>
 #include <map>
 #include <list>
 #include "City.h"
 
-class WeatherMicroserviceController {
+class WeatherMicroservice {
   public:
-    WeatherMicroserviceController();
+    WeatherMicroservice();
     void updateWeather(std::string, float, float, float);
     std::list<float> getWeather(std::string);
 
@@ -16,4 +16,4 @@ class WeatherMicroserviceController {
     std::map<std::string, City*> cities;
 };
 
-#endif
+#endif /* WEATHERMICROSERVICE_H_ */

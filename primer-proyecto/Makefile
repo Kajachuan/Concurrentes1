@@ -1,12 +1,12 @@
-SRCS := $(wildcard *.cpp)
+WEATHER_SRCS := $(wildcard Weather/*.cpp)
 OBJS := $(patsubst %.cpp, %.o, $(SRCS))
 CC := g++
 
 weather: $(OBJS)
-	$(CC) $(SRCS) -o $@
+	$(CC) $(WEATHER_SRCS) -o $@
 
 %.o: %.cpp
-	$(CC) $(SRCS) -c $<
+	$(CC) $(WEATHER_SRCS) -c $<
 
 clean:
-	rm -f *.o ej
+	rm -f *.o weather

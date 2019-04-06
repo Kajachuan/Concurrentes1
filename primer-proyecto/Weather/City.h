@@ -1,5 +1,5 @@
-#ifndef CITY_H
-#define CITY_H
+#ifndef CITY_H_
+#define CITY_H_
 
 #include <string>
 
@@ -20,4 +20,4 @@ class City {
     float humidity;
 };
 
-#endif
+#endif /* CITY_H_ */

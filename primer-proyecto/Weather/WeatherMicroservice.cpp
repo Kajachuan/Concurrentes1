@@ -1,17 +1,17 @@
-#include "WeatherMicroserviceController.h"
+#include "WeatherMicroservice.h"
 
-WeatherMicroserviceController::WeatherMicroserviceController() {
+WeatherMicroservice::WeatherMicroservice() {
   // Acá se debería abrir el archivo con las ciudades
   cities["Buenos Aires"] = new City("Buenos Aires",0,0,0);
 }
 
-void WeatherMicroserviceController::updateWeather(std::string name, float temperature, float pressure, float humidity) {
+void WeatherMicroservice::updateWeather(std::string name, float temperature, float pressure, float humidity) {
   cities[name]->setTemperature(temperature);
   cities[name]->setPressure(pressure);
   cities[name]->setHumidity(humidity);
 }
 
-std::list<float> WeatherMicroserviceController::getWeather(std::string name) {
+std::list<float> WeatherMicroservice::getWeather(std::string name) {
   std::list<float> weather;
   weather.push_back(cities[name]->getTemperature());
   weather.push_back(cities[name]->getPressure());
@@ -20,7 +20,7 @@ std::list<float> WeatherMicroserviceController::getWeather(std::string name) {
 }
 
 int main(int argc, char *argv[]) {
-  WeatherMicroserviceController* weatherMicroservice = new WeatherMicroserviceController();
+  WeatherMicroservice* weatherMicroservice = new WeatherMicroservice();
   // Acá debería comunicarse
   return 0;
 }
