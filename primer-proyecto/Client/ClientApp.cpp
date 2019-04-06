@@ -7,5 +7,5 @@ int main(int argc, char* argv[]) {
   std::cin >> command;
   Client* client = new Client();
   client->write(command);
-  std::cout << client->read() << std::endl;
+  // std::cout << client->read() << std::endl;
 }

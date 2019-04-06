@@ -3,12 +3,12 @@ CLIENT_SRCS := $(wildcard Client/*.cpp)
 PORTAL_SRCS := $(wildcard Portal/*.cpp)
 FIFO_SRCS := $(wildcard Fifo/*.cpp)
 OBJS := $(patsubst %.cpp, %.o, $(SRCS))
-CC := g++
+CC := g++ -std=c++11
 
 all: weather client portal
 
 weather: $(OBJS)
-	$(CC) $(WEATHER_SRCS) -o $@
+	$(CC) $(WEATHER_SRCS) $(FIFO_SRCS) -o $@
 
 client: $(OBJS)
 	$(CC) $(CLIENT_SRCS) $(FIFO_SRCS) -o $@

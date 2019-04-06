@@ -11,7 +11,9 @@ class Portal {
     Portal();
     ~Portal();
     void writeToClient(std::string);
+    void writeToWeather(std::string);
     std::string readFromClient();
+    std::string readFromWeather();
 
   private:
     FifoLectura* inputClient;
