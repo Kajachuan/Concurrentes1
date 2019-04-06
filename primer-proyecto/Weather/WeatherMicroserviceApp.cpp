@@ -8,6 +8,6 @@ int main(int argc, char const *argv[]) {
   // std::string temperature = std::to_string(weather.pop_front());
   // std::string pressure = std::to_string(weather.pop_front());
   // std::string humidity = std::to_string(weather.pop_front());
-  // weatherMicroservice->write("La temperatura");
+  weatherMicroservice->write("La temperatura");
   return 0;
 }

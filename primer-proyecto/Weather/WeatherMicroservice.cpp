@@ -6,14 +6,14 @@ WeatherMicroservice::WeatherMicroservice() {
   // Acá se debería abrir el archivo con las ciudades
   cities["Buenos Aires"] = new City("Buenos Aires",24,25,26);
   input = new FifoLectura("../portal-weather");
-  // output = new FifoEscritura("../weather-portal");
+  output = new FifoEscritura("../weather-portal");
   input->abrir();
-  // output->abrir();
+  output->abrir();
 }
 
 WeatherMicroservice::~WeatherMicroservice() {
   input->cerrar();
-  // output->cerrar();
+  output->cerrar();
 }
 
 void WeatherMicroservice::updateWeather(std::string name, float temperature, float pressure, float humidity) {

@@ -4,18 +4,18 @@
 
 Portal::Portal() {
   inputClient = new FifoLectura("../client-portal");
-  // inputWeather = new FifoLectura("../weather-portal");
+  inputWeather = new FifoLectura("../weather-portal");
   // outputClient = new FifoEscritura("../portal-client");
   outputWeather = new FifoEscritura("../portal-weather");
   inputClient->abrir();
-  // inputWeather->abrir();
+  inputWeather->abrir();
   // outputClient->abrir();
   outputWeather->abrir();
 }
 
 Portal::~Portal() {
   inputClient->cerrar();
-  // inputWeather->cerrar();
+  inputWeather->cerrar();
   // outputClient->cerrar();
   outputWeather->cerrar();
 }

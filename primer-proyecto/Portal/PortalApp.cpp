@@ -6,6 +6,6 @@ int main(int argc, char const *argv[]) {
   Portal* portal = new Portal();
   std::cout << "I read: " << portal->readFromClient() << std::endl;
   portal->writeToWeather("temperature");
-  // std::cout << "Temperature: " << portal->readFromWeather() << std::endl;
+  std::cout << "Temperature: " << portal->readFromWeather() << std::endl;
   return 0;
 }
