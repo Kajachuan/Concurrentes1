@@ -1,9 +1,9 @@
 #ifndef PRIMER_PROYECTO_CLIENT_H
 #define PRIMER_PROYECTO_CLIENT_H
 
-#include "../Fifo/Fifo.h"
-#include "../Fifo/FifoEscritura.h"
-#include "../Fifo/FifoLectura.h"
+#include "../primer-proyecto/Fifo/Fifo.h"
+#include "../primer-proyecto/Fifo/FifoEscritura.h"
+#include "../primer-proyecto/Fifo/FifoLectura.h"
 
 class Client {
   public:

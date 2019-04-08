@@ -9,15 +9,15 @@
 
 class Fifo {
 public:
-	Fifo(const std::string nombre);
-	virtual ~Fifo();
-	virtual void abrir() = 0;
-	void cerrar();
-	void eliminar() const;
+    explicit Fifo(std::string path_name);
+
+    virtual ~Fifo();
+
+    virtual void open_fifo() = 0;
 
 protected:
-	std::string nombre;
-	int fd;
+    std::string path_name;
+    int fd;
 };
 
 #endif /* FIFO_H_ */

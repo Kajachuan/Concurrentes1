@@ -2,9 +2,9 @@
 #define PORTAL_H_
 
 #include <string>
-#include "../Fifo/Fifo.h"
-#include "../Fifo/FifoEscritura.h"
-#include "../Fifo/FifoLectura.h"
+#include "../primer-proyecto/Fifo/Fifo.h"
+#include "../primer-proyecto/Fifo/FifoEscritura.h"
+#include "../primer-proyecto/Fifo/FifoLectura.h"
 
 class Portal {
   public:

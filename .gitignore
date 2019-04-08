@@ -1,6 +1,2 @@
-
-primer-proyecto/\.idea/
-
-primer-proyecto/cmake-build-debug/
-
-primer-proyecto/CMakeLists\.txt
+.idea/
+cmake-build-debug/
