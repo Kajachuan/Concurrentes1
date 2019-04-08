@@ -5,9 +5,9 @@
 #include <map>
 #include <list>
 #include "City.h"
-#include "../Fifo/Fifo.h"
-#include "../Fifo/FifoEscritura.h"
-#include "../Fifo/FifoLectura.h"
+#include "../IPC/Fifo/Fifo.h"
+#include "../IPC/Fifo/FifoReader.h"
+#include "../IPC/Fifo/FifoWriter.h"
 
 class WeatherMicroservice {
   public:
@@ -20,8 +20,8 @@ class WeatherMicroservice {
 
   private:
     std::map<std::string, City*> cities;
-    FifoLectura* input;
-    FifoEscritura* output;
+    FifoReader* input;
+    FifoWriter* output;
 };
 
 #endif /* WEATHERMICROSERVICE_H_ */

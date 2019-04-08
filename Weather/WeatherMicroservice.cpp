@@ -5,16 +5,13 @@
 WeatherMicroservice::WeatherMicroservice() {
   // Acá se debería abrir el archivo con las ciudades
   cities["Buenos Aires"] = new City("Buenos Aires",24,25,26);
-  input = new FifoLectura("../portal-weather");
-  output = new FifoEscritura("../weather-portal");
-  input->abrir();
-  output->abrir();
+  input = new FifoReader("../portal-weather");
+  output = new FifoWriter("../weather-portal");
+  input->open_fifo();
+  output->open_fifo();
 }
 
-WeatherMicroservice::~WeatherMicroservice() {
-  input->cerrar();
-  output->cerrar();
-}
+WeatherMicroservice::~WeatherMicroservice() = default;
 
 void WeatherMicroservice::updateWeather(std::string name, float temperature, float pressure, float humidity) {
   cities[name]->setTemperature(temperature);
@@ -31,12 +28,12 @@ std::list<float> WeatherMicroservice::getWeather(std::string name) {
 }
 
 void WeatherMicroservice::write(std::string message) {
-  output->escribir(static_cast<const void*>(message.c_str()), message.length());
+  output->write_fifo(static_cast<const void*>(message.c_str()), message.length());
 }
 
 std::string WeatherMicroservice::read() {
   char buffer[BUFFSIZE];
-  ssize_t bytes = input->leer(static_cast<void*>(buffer), BUFFSIZE);
+  ssize_t bytes = input->read_fifo(static_cast<void*>(buffer), BUFFSIZE);
   std::string message = buffer;
   message.resize(bytes);
   return message;

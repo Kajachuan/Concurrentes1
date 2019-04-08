@@ -2,18 +2,14 @@
 
 Client::Client() {
   // input = new FifoLectura("../portal-client");
-  output = new FifoEscritura("../client-portal");
+  output = new FifoWriter("../client-portal");
   // input->abrir();
-  output->abrir();
 }
 
-Client::~Client() {
-  // input->cerrar();
-  output->cerrar();
-}
+Client::~Client() = default;
 
 void Client::write(std::string message) {
-  output->escribir(static_cast<const void*>(message.c_str()), message.length());
+  output->write_fifo(static_cast<const void*>(message.c_str()), message.length());
 }
 
 std::string Client::read() {

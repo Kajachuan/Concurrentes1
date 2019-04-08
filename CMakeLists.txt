@@ -19,6 +19,11 @@ add_executable(portal ${PORTAL_SOURCES})
 set(CLIENT_SOURCES Client/ClientApp.cpp Client/Client.cpp Client/Client.h)
 add_executable(client ${CLIENT_SOURCES})
 
+# Weather microservice
+set(WEATHER_MS_SOURCES Weather/City.cpp Weather/City.h Weather/WeatherMicroserviceApp.cpp
+        Weather/WeatherMicroservice.cpp Weather/WeatherMicroservice.h)
+add_executable(weather_ms ${WEATHER_MS_SOURCES})
+
 # Test
 set(TEST_CATCH test/catch.hpp)
 set(FIFO_TEST test/FifoTest/FifoTest.cpp ${TEST_CATCH} ${FIFO})

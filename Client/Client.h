@@ -1,9 +1,9 @@
 #ifndef PRIMER_PROYECTO_CLIENT_H
 #define PRIMER_PROYECTO_CLIENT_H
 
-#include "../primer-proyecto/Fifo/Fifo.h"
-#include "../primer-proyecto/Fifo/FifoEscritura.h"
-#include "../primer-proyecto/Fifo/FifoLectura.h"
+#include "../IPC/Fifo/Fifo.h"
+#include "../IPC/Fifo/FifoReader.h"
+#include "../IPC/Fifo/FifoWriter.h"
 
 class Client {
   public:
@@ -13,8 +13,8 @@ class Client {
     std::string read();
 
   private:
-    FifoLectura* input;
-    FifoEscritura* output;
+    FifoReader* input;
+    FifoWriter* output;
 };
 
 

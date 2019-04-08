@@ -2,9 +2,9 @@
 #define PORTAL_H_
 
 #include <string>
-#include "../primer-proyecto/Fifo/Fifo.h"
-#include "../primer-proyecto/Fifo/FifoEscritura.h"
-#include "../primer-proyecto/Fifo/FifoLectura.h"
+#include "../IPC/Fifo/Fifo.h"
+#include "../IPC/Fifo/FifoReader.h"
+#include "../IPC/Fifo/FifoWriter.h"
 
 class Portal {
   public:
@@ -16,10 +16,10 @@ class Portal {
     std::string readFromWeather();
 
   private:
-    FifoLectura* inputClient;
-    FifoLectura* inputWeather;
-    FifoEscritura* outputClient;
-    FifoEscritura* outputWeather;
+    FifoReader* inputClient;
+    FifoReader* inputWeather;
+    FifoWriter* outputClient;
+    FifoWriter* outputWeather;
 };
 
 #endif /* PORTAL_H_ */
