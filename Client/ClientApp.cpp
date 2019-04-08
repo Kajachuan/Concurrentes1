@@ -1,11 +1,13 @@
-#include "Client.h"
+#include "ClientController.h"
 #include <iostream>
+
+using namespace std;
 
 int main(int argc, char* argv[]) {
   std::cout << "Insert your command here: ";
   std::string command;
   std::cin >> command;
-  Client* client = new Client();
-  client->write(command);
-  // std::cout << client->read() << std::endl;
+  std::cout << "creatin writer 22";
+  auto * client = new ClientController("/tmp/client-portal", "/tmp/portal-client");
+  std::cout << client->portal_request(command) << std::endl;
 }

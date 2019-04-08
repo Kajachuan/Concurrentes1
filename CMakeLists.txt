@@ -12,12 +12,12 @@ set(FIFO IPC/Fifo/Fifo.cpp IPC/Fifo/Fifo.h IPC/Fifo/FifoReader.cpp IPC/Fifo/Fifo
         IPC/Fifo/FifoWriter.cpp IPC/Fifo/FifoWriter.h ${MKNOD_EXCEPTION} ${FILE_EXIST_EXCEPTION})
 
 # Portal
-set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/Portal.cpp Portal/Portal.h)
-add_executable(portal ${PORTAL_SOURCES})
+set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h)
+add_executable(portal ${PORTAL_SOURCES} ${FIFO})
 
-# Client
-set(CLIENT_SOURCES Client/ClientApp.cpp Client/Client.cpp Client/Client.h)
-add_executable(client ${CLIENT_SOURCES})
+# ClientController
+set(CLIENT_SOURCES Client/ClientApp.cpp Client/ClientController.cpp Client/ClientController.h)
+add_executable(client ${CLIENT_SOURCES} ${FIFO})
 
 # Weather microservice
 set(WEATHER_MS_SOURCES Weather/City.cpp Weather/City.h Weather/WeatherMicroserviceApp.cpp
