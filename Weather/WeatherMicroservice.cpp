@@ -11,7 +11,10 @@ WeatherMicroservice::WeatherMicroservice() {
   output->open_fifo();
 }
 
-WeatherMicroservice::~WeatherMicroservice() = default;
+WeatherMicroservice::~WeatherMicroservice(){
+  delete input;
+  delete output;
+}
 
 void WeatherMicroservice::updateWeather(std::string name, float temperature, float pressure, float humidity) {
   cities[name]->setTemperature(temperature);

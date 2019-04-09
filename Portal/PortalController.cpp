@@ -11,16 +11,18 @@ PortalController::PortalController(const std::string output_fifo_path_name,
     input->open_fifo();
 }
 
-PortalController::~PortalController() = default;
+PortalController::~PortalController(){
+    delete output;
+    delete input;
+}
 
 void PortalController::process_requests() {
-    char buffer[BUFFER_SIZE];
-    ssize_t readedBytes = input->read_fifo(static_cast<void *>(buffer), BUFFER_SIZE);
-    if (readedBytes > 0) {
-        std::string request_message = buffer;
-        request_message.resize(static_cast<unsigned long>(readedBytes));
-        std::cout << request_message << std::endl;
-        std::string response_message = "asd";
+    struct message_t message;
+    ssize_t readBytes = input->read_fifo(static_cast<void *>(&message), sizeof(message));
+    if (readBytes > 0) {
+        std::cout << "Service: " << message.service << "; Method: " << message.method << "; Code"
+                  << message.code << std::endl;
+        std::string response_message = "Mensaje recibido... Esperando respuesta";
         output->write_fifo(static_cast<const void *>(response_message.c_str()), response_message.length());
     }
 }

@@ -3,6 +3,7 @@
 
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
+#include "../Commons/Message.h"
 
 class ClientController {
 public:

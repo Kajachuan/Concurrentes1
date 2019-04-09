@@ -8,6 +8,10 @@ int main(int argc, char *argv[]) {
     std::cout << "Insert your command here: ";
     std::string command;
     std::cin >> command;
+    while (command.size() != 5) {
+        std::cout << "Command must be 5 chars long. Insert your new command: ";
+        std::cin >> command;
+    }
     auto logger = Logger::getInstance("client main");
     Logger::setLogLevel(DEBUG);
     logger->logMessage(DEBUG, "test");
