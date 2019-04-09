@@ -41,17 +41,15 @@ void PortalController::process_requests() {
         std::string clientRequest = "Service: ";
         logger->logMessage(DEBUG, request_message.asString());
         // ... Aca voy a pedir las cosas a los ms y despues lo devuelvo como se debe
-        PortalResponse msResponse = getMSResponse();
+        PortalResponse msResponse = getMSResponse(request_message);
         logger->logMessage(DEBUG, "Writing response to client");
         responseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
     }
 }
 
-PortalResponse PortalController::getMSResponse() {
+PortalResponse PortalController::getMSResponse(MSRequest requestMessage) {
     std::string responseMSFifoPath = "/tmp/testResponseFifo";
-    MSRequest requestMessage{READ, WEATHER, {}, "", "", false};
     strcpy(requestMessage.responseFifoPath, responseMSFifoPath.c_str());
-    strcpy(requestMessage.code, "bas");
     requestMessage.closeConnection = false;
     logger->logMessage(DEBUG, "Sending response fifo path to ms and request: " + requestMessage.asString());
     requestMSFifo->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
