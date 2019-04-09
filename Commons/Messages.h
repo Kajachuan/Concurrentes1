@@ -24,6 +24,7 @@ struct WeatherRecord {
     float pressure;
     float humidity;
     char name[20];
+    char code[3];
 
     std::string asString() {
         std::stringstream response_message;
