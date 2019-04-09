@@ -15,7 +15,7 @@ set(FIFO IPC/Fifo/Fifo.cpp IPC/Fifo/Fifo.h IPC/Fifo/FifoReader.cpp IPC/Fifo/Fifo
         IPC/Fifo/FifoWriter.cpp IPC/Fifo/FifoWriter.h ${MKNOD_EXCEPTION} ${FILE_EXIST_EXCEPTION})
 
 # Commons
-set(COMMONS Commons/Message.h)
+set(COMMONS Commons/Messages.h)
 
 # Portal
 set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h)

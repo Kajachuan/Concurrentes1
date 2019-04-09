@@ -17,12 +17,21 @@ PortalController::~PortalController(){
 }
 
 void PortalController::process_requests() {
-    struct message_t message;
-    ssize_t readBytes = input->read_fifo(static_cast<void *>(&message), sizeof(message));
+    struct portal_request_message_t request_message;
+    ssize_t readBytes = input->read_fifo(static_cast<void *>(&request_message), sizeof(request_message));
     if (readBytes > 0) {
-        std::cout << "Service: " << message.service << "; Method: " << message.method << "; Code"
-                  << message.code << std::endl;
-        std::string response_message = "Mensaje recibido... Esperando respuesta";
-        output->write_fifo(static_cast<const void *>(response_message.c_str()), response_message.length());
+        std::cout << "Service: " << request_message.service << "; Method: " << request_message.method
+                  << "; Code: " << request_message.code << std::endl;
+        // ... Aca voy a pedir las cosas a los ms y despues lo devuelvo como se debe
+        struct portal_response_message_t response_message;
+        response_message.service = request_message.service;
+        if (request_message.service == 'C') {
+            response_message.exchange_rate = 44.78;
+        } else if (request_message.service == 'W') {
+            response_message.temperature = 19;
+            response_message.humidity = 98;
+            response_message.pressure = 1030;
+        }
+        output->write_fifo(static_cast<const void *>(&response_message), sizeof(response_message));
     }
 }
