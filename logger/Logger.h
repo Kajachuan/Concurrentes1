@@ -10,6 +10,8 @@ enum LogLevel {
     ERROR
 };
 
+static const char *logLevelNames[] = {"DEBUG", "INFO", "WARNING", "ERROR"};
+
 class Logger {
 private:
     static Logger *instance;

@@ -4,9 +4,11 @@
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../Commons/Message.h"
+#include "../logger/Logger.h"
 
 class ClientController {
 public:
+    static Logger *logger;
     ClientController(std::string output_fifo_path_name, std::string input_fifo_path_name);
 
     ~ClientController();
