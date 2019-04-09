@@ -6,7 +6,7 @@
 
 enum Service {
     WEATHER,
-    CHANGE
+    EXCHANGE
 };
 
 enum Method {
@@ -15,7 +15,7 @@ enum Method {
 };
 
 const std::map<char, Method> CHAR_TO_METHOD = {{'r', READ}, {'w', WRITE}};
-const std::map<char, Service> CHAR_TO_SERVICE = {{'w', WEATHER}, {'c', CHANGE}};
+const std::map<char, Service> CHAR_TO_SERVICE = {{'w', WEATHER}, {'c', EXCHANGE}};
 static const char *serviceNames[] = {"WEATHER", "CHANGE"};
 static const char *methodNames[] = {"READ", "WRITE"};
 
@@ -28,7 +28,18 @@ struct WeatherRecord {
     std::string asString() {
         std::stringstream response_message;
         response_message  << "name: " <<  name <<"; temperature: " << temperature << "; pressure: " << pressure
-        << "; humidity: " << humidity;
+                          << "; humidity: " << humidity;
+        return response_message.str();
+    }
+};
+
+struct ExchangeRecord {
+    float exchange;
+    char name[20];
+
+    std::string asString() {
+        std::stringstream response_message;
+        response_message  << "name: " <<  name <<"; exchange: " << exchange;
         return response_message.str();
     }
 };
@@ -37,6 +48,7 @@ struct PortalResponse {
     Service service;
     union {
         WeatherRecord weatherRecord;
+        ExchangeRecord exchangeRecord;
     };
     bool found;
 
@@ -56,6 +68,7 @@ struct MSRequest {
     Service service;
     union {
         WeatherRecord weatherRecord;
+        ExchangeRecord exchangeRecord;
     };
     char responseFifoPath[50];
     char code[3];
@@ -73,27 +86,6 @@ struct MSRequest {
             representation = representation + ", closeConnection: false";
         }
         return representation;
-    }
-};
-
-template <class DataRecord>
-class DataRecordManager {
-public:
-    virtual void setRecordToResponse(PortalResponse*, DataRecord) = 0;
-    virtual DataRecord getRecordFromRequest(MSRequest) = 0;
-    virtual Service getServiceName() = 0;
-};
-
-class WeatherRecordManager: public DataRecordManager<WeatherRecord> {
-public:
-    void setRecordToResponse(PortalResponse *portalResponse, WeatherRecord dataRecord) {
-        portalResponse->weatherRecord = dataRecord;
-    }
-    WeatherRecord getRecordFromRequest(MSRequest msRequest) {
-        return  msRequest.weatherRecord;
-    }
-    Service getServiceName() {
-        return  WEATHER;
     }
 };
 

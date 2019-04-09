@@ -8,6 +8,7 @@
 #include "CRUDMicroserviceController.h"
 #include "../logger/Logger.h"
 #include "../Commons/Messages.h"
+#include "../Commons/DataRecordManager.h"
 
 template <class DataRecord>
 class CRUDMicroserviceController: public MicroserviceController {
