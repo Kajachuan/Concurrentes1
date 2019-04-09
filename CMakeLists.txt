@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.5)
 project(primer-proyecto)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -25,7 +25,7 @@ add_executable(client ${CLIENT_SOURCES} ${FIFO} ${LOGGER})
 # Weather microservice
 set(WEATHER_MS_SOURCES Weather/City.cpp Weather/City.h Weather/WeatherMicroserviceApp.cpp
         Weather/WeatherMicroservice.cpp Weather/WeatherMicroservice.h)
-add_executable(weather_ms ${WEATHER_MS_SOURCES})
+add_executable(weather_ms ${WEATHER_MS_SOURCES} ${FIFO})
 
 # Test
 set(TEST_CATCH test/catch.hpp)
