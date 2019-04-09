@@ -35,34 +35,34 @@ PortalController::~PortalController(){
 }
 
 void PortalController::process_requests() {
-    struct portal_request_message_t request_message;
+    MSRequest request_message;
     ssize_t readBytes = requestFifo->read_fifo(static_cast<void *>(&request_message), sizeof(request_message));
     if (readBytes > 0) {
         std::string clientRequest = "Service: ";
         logger->logMessage(DEBUG, request_message.asString());
         // ... Aca voy a pedir las cosas a los ms y despues lo devuelvo como se debe
-        portal_response_message_t msResponse = getMSResponse();
+        PortalResponse msResponse = getMSResponse();
         logger->logMessage(DEBUG, "Writing response to client");
-        responseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(portal_response_message_t));
+        responseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
     }
 }
 
-portal_response_message_t PortalController::getMSResponse() {
+PortalResponse PortalController::getMSResponse() {
     std::string responseMSFifoPath = "/tmp/testResponseFifo";
-    WeatherRequest requestMessage{READ, "", 0, 0, 0, "asd", "", false};
+    MSRequest requestMessage{READ, WEATHER, {}, "", "", false};
     strcpy(requestMessage.responseFifoPath, responseMSFifoPath.c_str());
     strcpy(requestMessage.code, "bas");
     requestMessage.closeConnection = false;
     logger->logMessage(DEBUG, "Sending response fifo path to ms and request: " + requestMessage.asString());
-    requestMSFifo->write_fifo(static_cast<void *>(&requestMessage), sizeof(WeatherRequest));
+    requestMSFifo->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
 
     logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + responseMSFifoPath);
     FifoReader responseMSFifo(responseMSFifoPath);
     responseMSFifo.open_fifo();
     logger->logMessage(DEBUG, "Reading response fifo from ms");
-    portal_response_message_t responseMessage{};
+    PortalResponse responseMessage{};
     ssize_t readedBytes = responseMSFifo.read_fifo(static_cast<void *>(&responseMessage),
-            sizeof(portal_response_message_t));
+            sizeof(PortalResponse));
     if (readedBytes > 0) {
         logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
     }

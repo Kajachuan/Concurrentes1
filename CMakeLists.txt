@@ -24,9 +24,9 @@ add_executable(portal ${PORTAL_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
 # Microservices
 set(MICROSERVICE_SOURCES Microservices/MicroserviceController.cpp Microservices/MicroserviceController.h
         ${FIFO} ${LOGGER})
-set(WEATHER_MS_SOURCES Microservices/MicroserviceApp.cpp  Microservices/Weather/WeatherMicroserviceController.cpp
-        Microservices/Weather/WeatherMicroserviceController.h ${MICROSERVICE_SOURCES} ${COMMONS})
-add_executable(microservice ${WEATHER_MS_SOURCES})
+set(CRUD_MS_SOURCES Microservices/MicroserviceApp.cpp Microservices/CRUDMicroserviceController.h
+        ${MICROSERVICE_SOURCES} ${COMMONS})
+add_executable(microservice ${CRUD_MS_SOURCES})
 
 # ClientController
 set(CLIENT_SOURCES Client/ClientApp.cpp Client/ClientController.cpp Client/ClientController.h)
