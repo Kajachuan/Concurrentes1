@@ -2,11 +2,13 @@
 #include "PortalController.h"
 
 int main(int argc, char const *argv[]) {
-
-  std::cout << "Insert your command here33: " <<std::endl ;
-  auto portal = PortalController("/tmp/portal-client", "/tmp/client-portal");
+  auto logger = Logger::getInstance("portal main");
+  Logger::setLogLevel(DEBUG);
+  auto portal = PortalController("/tmp/portal-client", "/tmp/client-portal", "/tmp/ms-portal");
   while(true) {
+    logger->logMessage(DEBUG, "processed message");
     sleep(2);
     portal.process_requests();
   }
+  Logger::endLogger();
 }

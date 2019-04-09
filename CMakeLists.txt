@@ -21,6 +21,11 @@ set(COMMONS Commons/Messages.h)
 set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h)
 add_executable(portal ${PORTAL_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
 
+# Portal
+set(MICROSERVICE_SOURCES Microservices/MicroserviceApp.cpp Microservices/MicroserviceController.cpp
+        Microservices/MicroserviceController.h)
+add_executable(microservice ${MICROSERVICE_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
+
 # ClientController
 set(CLIENT_SOURCES Client/ClientApp.cpp Client/ClientController.cpp Client/ClientController.h)
 add_executable(client ${CLIENT_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})

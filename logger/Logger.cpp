@@ -31,8 +31,10 @@ void Logger::logMessage(LogLevel logLevel, std::string message) {
         auto string_time = std::string(ctime(&now));
         string_time.resize(string_time.length()-1);
         std::string reporterMessage = string_time + " :: " + logLevelNames[logLevel] + " :: " + reporter +
-                " :: " + message + "\n";
-        write(fd, reporterMessage.c_str(), reporterMessage.length());
+                " :: " + message;
+        std::string reporterMessageWithEndLine = reporterMessage + "\n";
+        write(fd, reporterMessageWithEndLine.c_str(), reporterMessageWithEndLine.length());
+        std::cout << reporterMessage << std::endl;
     }
 }
 

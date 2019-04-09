@@ -6,18 +6,23 @@
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../Commons/Messages.h"
+#include "../logger/Logger.h"
 
 class PortalController {
 public:
-    PortalController(std::string output_fifo_path_name, std::string input_fifo_path_name);
+    PortalController(std::string responseFifoPath, std::string requestFifoPath,
+            std::string registerMSFifoPath);
 
     ~PortalController();
 
     void process_requests();
 
 private:
-    FifoReader *input;
-    FifoWriter *output;
+    void getMSResponse();
+    static Logger *logger;
+    FifoReader *requestFifo;
+    FifoWriter *responseFifo;
+    FifoWriter *requestMSFifo;
 };
 
 #endif /* PORTAL_CONTROLLER_H_ */
