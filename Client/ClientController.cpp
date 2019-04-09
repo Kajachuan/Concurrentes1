@@ -24,8 +24,8 @@ std::string ClientController::portal_request(std::string request_message) {
     logger->logMessage(INFO, "Sending client request to portal: " + request_message);
 
     struct portal_request_message_t message;
-    message.service = request_message.at(0);
-    message.method = request_message.at(1);
+    message.service = CHAR_TO_SERVICE.at(request_message.at(0));
+    message.method = CHAR_TO_METHOD.at(request_message.at(1));
     strcpy(message.code, request_message.substr(2, 3).c_str());
     output->write_fifo(static_cast<const void *>(&message), sizeof(message));
 

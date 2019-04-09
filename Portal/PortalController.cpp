@@ -38,16 +38,14 @@ void PortalController::process_requests() {
     ssize_t readBytes = requestFifo->read_fifo(static_cast<void *>(&request_message), sizeof(request_message));
     if (readBytes > 0) {
         std::string clientRequest = "Service: ";
-        clientRequest = clientRequest + request_message.service + "; Method: " + request_message.method + "; Code: "
-                + request_message.code;
-        logger->logMessage(DEBUG, clientRequest);
+        logger->logMessage(DEBUG, request_message.asString());
         // ... Aca voy a pedir las cosas a los ms y despues lo devuelvo como se debe
         getMSResponse();
         struct portal_response_message_t response_message;
         response_message.service = request_message.service;
-        if (request_message.service == 'C') {
+        if (request_message.service == CHANGE) {
             response_message.exchange_rate = 44.78;
-        } else if (request_message.service == 'W') {
+        } else if (request_message.service == WEATHER) {
             response_message.temperature = 19;
             response_message.humidity = 98;
             response_message.pressure = 1030;
