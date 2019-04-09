@@ -21,19 +21,16 @@ set(COMMONS Commons/Messages.h)
 set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h)
 add_executable(portal ${PORTAL_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
 
-# Portal
-set(MICROSERVICE_SOURCES Microservices/MicroserviceApp.cpp Microservices/MicroserviceController.cpp
-        Microservices/MicroserviceController.h)
-add_executable(microservice ${MICROSERVICE_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
+# Microservices
+set(MICROSERVICE_SOURCES Microservices/MicroserviceController.cpp Microservices/MicroserviceController.h
+        ${FIFO} ${LOGGER})
+set(WEATHER_MS_SOURCES Microservices/MicroserviceApp.cpp  Microservices/Weather/WeatherMicroserviceController.cpp
+        Microservices/Weather/WeatherMicroserviceController.h ${MICROSERVICE_SOURCES} ${COMMONS})
+add_executable(microservice ${WEATHER_MS_SOURCES})
 
 # ClientController
 set(CLIENT_SOURCES Client/ClientApp.cpp Client/ClientController.cpp Client/ClientController.h)
 add_executable(client ${CLIENT_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
-
-# Weather microservice
-set(WEATHER_MS_SOURCES Weather/City.cpp Weather/City.h Weather/WeatherMicroserviceApp.cpp
-        Weather/WeatherMicroservice.cpp Weather/WeatherMicroservice.h)
-add_executable(weather_ms ${WEATHER_MS_SOURCES} ${FIFO} ${COMMONS})
 
 # Test
 set(TEST_CATCH test/catch.hpp)

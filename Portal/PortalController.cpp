@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include "PortalController.h"
 #include "../logger/Logger.h"
 
@@ -40,36 +41,30 @@ void PortalController::process_requests() {
         std::string clientRequest = "Service: ";
         logger->logMessage(DEBUG, request_message.asString());
         // ... Aca voy a pedir las cosas a los ms y despues lo devuelvo como se debe
-        getMSResponse();
-        struct portal_response_message_t response_message;
-        response_message.service = request_message.service;
-        if (request_message.service == CHANGE) {
-            response_message.exchange_rate = 44.78;
-        } else if (request_message.service == WEATHER) {
-            response_message.temperature = 19;
-            response_message.humidity = 98;
-            response_message.pressure = 1030;
-        }
+        portal_response_message_t msResponse = getMSResponse();
         logger->logMessage(DEBUG, "Writing response to client");
-        responseFifo->write_fifo(static_cast<const void *>(&response_message), sizeof(response_message));
+        responseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(portal_response_message_t));
     }
 }
 
-void PortalController::getMSResponse() {
-    logger->logMessage(DEBUG, "Sending response fifo path to ms");
+portal_response_message_t PortalController::getMSResponse() {
     std::string responseMSFifoPath = "/tmp/testResponseFifo";
-    requestMSFifo->write_fifo(responseMSFifoPath.c_str(), responseMSFifoPath.length());
+    WeatherRequest requestMessage{READ, "", 0, 0, 0, "asd", "", false};
+    strcpy(requestMessage.responseFifoPath, responseMSFifoPath.c_str());
+    strcpy(requestMessage.code, "bas");
+    requestMessage.closeConnection = false;
+    logger->logMessage(DEBUG, "Sending response fifo path to ms and request: " + requestMessage.asString());
+    requestMSFifo->write_fifo(static_cast<void *>(&requestMessage), sizeof(WeatherRequest));
 
     logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + responseMSFifoPath);
     FifoReader responseMSFifo(responseMSFifoPath);
     responseMSFifo.open_fifo();
     logger->logMessage(DEBUG, "Reading response fifo from ms");
-    char buffer[BUFFER_SIZE];
-    ssize_t readedBytes = responseMSFifo.read_fifo(static_cast<void *>(buffer), BUFFER_SIZE);
+    portal_response_message_t responseMessage{};
+    ssize_t readedBytes = responseMSFifo.read_fifo(static_cast<void *>(&responseMessage),
+            sizeof(portal_response_message_t));
     if (readedBytes > 0) {
-        std::string responseMessage = buffer;
-        responseMessage.resize(static_cast<unsigned long>(readedBytes));
-        logger->logMessage(DEBUG, "Received response from ms: " + responseMessage);
-        requestMSFifo = new FifoWriter(responseMessage);
+        logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
     }
+    return responseMessage;
 }

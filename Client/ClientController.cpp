@@ -31,15 +31,7 @@ std::string ClientController::portal_request(std::string request_message) {
 
     struct portal_response_message_t response_message_fifo;
     ssize_t readedBytes = input->read_fifo(static_cast<void *>(&response_message_fifo), sizeof(response_message_fifo));
-    std::stringstream response_message;
-    if (response_message_fifo.service == 'W') {
-        response_message  << "Temperature: " << response_message_fifo.temperature <<"; Pressure: "
-                << response_message_fifo.pressure << "; Humidity: " << response_message_fifo.humidity
-                << std::endl;
-    } else if (response_message_fifo.service == 'C') {
-        response_message << "Exchange rate: " << response_message_fifo.exchange_rate << std::endl;
-    }
-    logger->logMessage(INFO, "Received response from the portal: " + response_message.str());
+    logger->logMessage(INFO, "Received response from the portal: " + response_message_fifo.asString());
 
-    return response_message.str();
+    return response_message_fifo.asString();
 }

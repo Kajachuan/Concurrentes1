@@ -2,6 +2,7 @@
 #define PRIMER_PROYECTO_MESSAGE_H
 
 #include <map>
+#include <sstream>
 
 enum Service {
     WEATHER,
@@ -38,6 +39,36 @@ struct portal_response_message_t {
     float temperature;
     float pressure;
     float humidity;
+    bool found;
+
+    std::string asString() {
+        std::stringstream response_message;
+        response_message  << "Temperature: " << temperature <<"; Pressure: "
+                          << pressure << "; Humidity: " << humidity << std::endl;
+        return response_message.str();
+    }
+};
+
+struct WeatherRequest {
+    Method method;
+    char code[3];
+    float temperature;
+    float pressure;
+    float humidity;
+    char name[20];
+    char responseFifoPath[50];
+    bool closeConnection;
+
+    std::string asString() {
+        std::string representation = "Method: ";
+        representation = representation + methodNames[method] + ", Name: " + name + ", Code: " + code;
+        if (closeConnection) {
+            representation = representation + ", closeConnection: true";
+        } else {
+            representation = representation + ", closeConnection: false";
+        }
+        return representation;
+    }
 };
 
 

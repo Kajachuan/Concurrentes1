@@ -15,12 +15,13 @@ public:
 
     ~MicroserviceController();
 
-    void processRequest();
+    virtual void processRequest() = 0;
 
-private:
-    static Logger *logger;
+protected:
     FifoReader *requestFifo;
     std::map<std::string, FifoWriter *> responseFifos;
+private:
+    static Logger *logger;
 };
 
 
