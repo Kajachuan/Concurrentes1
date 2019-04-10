@@ -16,11 +16,10 @@ PortalController::PortalController(std::string connectionRequestFifoPath) {
 
 PortalController::~PortalController(){
     delete connectionRequestFifo;
-    delete servicesRequestFifos;
 }
 
 void PortalController::endPortal(){
-    logger->logMessage(DEBUG, "Waiting child processes");
+    logger->logMessage(DEBUG, "Waiting child processes and clients to end connections");
     int status;
     for (int i = 0; i < forkedChilds; ++i) {
         wait(&status);
@@ -30,7 +29,16 @@ void PortalController::endPortal(){
     logger->logMessage(DEBUG, "Sending close connection to services");
     MSRequest requestMessage{};
     requestMessage.closeConnection = true;
-    servicesRequestFifos->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
+    std::map<INSTANCE_TYPE, std::map<std::string, FifoWriter *>>::iterator serviceIterator;
+    for (serviceIterator = servicesRequestFifos.begin(); serviceIterator != servicesRequestFifos.end();
+         serviceIterator++) {
+        std::map<std::string, FifoWriter *>::iterator instanceIterator;
+        for (instanceIterator = serviceIterator->second.begin(); instanceIterator != serviceIterator->second.end();
+             instanceIterator++) {
+            instanceIterator->second->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
+            delete instanceIterator->second;
+        }
+    }
 }
 
 int PortalController::processConnectionRequests() {
@@ -45,22 +53,25 @@ int PortalController::processConnectionRequests() {
                     std::string clientRequestFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
                     std::string servicesResponseFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
                     MSQueryController msQueryController(clientRequestFifoPath, requestMessage.senderResponseFifoPath,
-                                                        servicesResponseFifoPath, servicesRequestFifos);
+                                                        servicesResponseFifoPath, getRequestServicesMap());
                     while (!msQueryController.process_requests()) {};
                 } else {
                     forkedChilds++;
                 }
                 return pid;
             }
+            case EXCHANGE_MICROSERVICE:
             case WEATHER_MICROSERVICE: {
-                logger->logMessage(DEBUG, "WEATHER_MICROSERVICE registration request in fifo path: " +
-                        std::string(requestMessage.senderResponseFifoPath));
-                servicesRequestFifos = new FifoWriter(requestMessage.senderResponseFifoPath);
-                servicesRequestFifos->open_fifo();
-                break;
-            }
-            case EXCHANGE_MICROSERVICE: {
-                logger->logMessage(DEBUG, "EXCHANGE_MICROSERVICE registration request");
+                logger->logMessage(DEBUG, "Service: " + std::string(serviceNames[requestMessage.instanceType]) +
+                " registration request in fifo path: " + std::string(requestMessage.senderResponseFifoPath));
+                if (servicesRequestFifos[requestMessage.instanceType].count(
+                        requestMessage.senderResponseFifoPath) == 0) {
+                    logger->logMessage(DEBUG, "Creating new service request fifo: " +
+                    std::string(requestMessage.senderResponseFifoPath));
+                    FifoWriter *servFifo = new FifoWriter(requestMessage.senderResponseFifoPath);
+                    servFifo->open_fifo();
+                    servicesRequestFifos[requestMessage.instanceType][requestMessage.senderResponseFifoPath] = servFifo;
+                }
                 break;
             }
             default: {
@@ -71,4 +82,16 @@ int PortalController::processConnectionRequests() {
         }
     }
     return true;
+}
+
+std::map<INSTANCE_TYPE, FifoWriter*> PortalController::getRequestServicesMap() {
+    std::map<INSTANCE_TYPE, FifoWriter*> resultServiceMap;
+    std::map<INSTANCE_TYPE, std::map<std::string, FifoWriter *>>::iterator serviceIterator;
+    for (serviceIterator = servicesRequestFifos.begin(); serviceIterator != servicesRequestFifos.end();
+    serviceIterator++) {
+        // Here we can make some load balancing stuff
+        // Now is getting the first service of every type
+        resultServiceMap[serviceIterator->first] = (serviceIterator->second).begin()->second;
+    }
+    return resultServiceMap;
 }

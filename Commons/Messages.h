@@ -56,6 +56,7 @@ struct PortalResponse {
         ExchangeRecord exchangeRecord;
     };
     bool found;
+    bool requestError = false;
 
     std::string asString() {
         std::stringstream response_message;

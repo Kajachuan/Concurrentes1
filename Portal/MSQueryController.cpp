@@ -8,7 +8,7 @@
 Logger *MSQueryController::logger = Logger::getInstance("MSQueryController");
 
 MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::string clientResponseFifoPath,
-        std::string servicesResponseFifoPath, FifoWriter *servicesRequestFifos) {
+        std::string servicesResponseFifoPath, std::map<INSTANCE_TYPE, FifoWriter*> servicesRequestFifos) {
     this->servicesRequestFifos = servicesRequestFifos;
     this->servicesResponseFifoPath = std::move(servicesResponseFifoPath);
     this->servicesResponseFifo = nullptr;
@@ -29,7 +29,6 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
 MSQueryController::~MSQueryController(){
     delete clientResponseFifo;
     delete clientRequestFifo;
-    delete servicesRequestFifos;
     delete servicesResponseFifo;
 }
 
@@ -46,22 +45,29 @@ bool MSQueryController::process_requests() {
 }
 
 PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
-    strcpy(requestMessage.responseFifoPath, servicesResponseFifoPath.c_str());
-    requestMessage.closeConnection = false;
-    logger->logMessage(DEBUG, "Sending request to microservice: " + requestMessage.asString());
-    servicesRequestFifos->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
-
-    if (servicesResponseFifo == nullptr) {
-        logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + servicesResponseFifoPath);
-        servicesResponseFifo = new FifoReader(servicesResponseFifoPath);
-        servicesResponseFifo->open_fifo();
-    }
-    logger->logMessage(DEBUG, "Reading response fifo from ms");
     PortalResponse responseMessage{};
-    ssize_t readedBytes = servicesResponseFifo->read_fifo(static_cast<void *>(&responseMessage),
-            sizeof(PortalResponse));
-    if (readedBytes > 0) {
-        logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
+    if (servicesRequestFifos.count(requestMessage.instanceType) == 0) {
+        logger->logMessage(WARNING, "No instance for this service");
+        responseMessage.requestError = true;
+    } else {
+        strcpy(requestMessage.responseFifoPath, servicesResponseFifoPath.c_str());
+        requestMessage.closeConnection = false;
+        logger->logMessage(DEBUG, "Sending request to microservice: " + requestMessage.asString());
+        servicesRequestFifos[requestMessage.instanceType]->write_fifo(static_cast<void *>(&requestMessage),
+                                                                      sizeof(MSRequest));
+
+        if (servicesResponseFifo == nullptr) {
+            logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + servicesResponseFifoPath);
+            servicesResponseFifo = new FifoReader(servicesResponseFifoPath);
+            servicesResponseFifo->open_fifo();
+        }
+
+        logger->logMessage(DEBUG, "Reading response fifo from ms");
+        ssize_t readedBytes = servicesResponseFifo->read_fifo(static_cast<void *>(&responseMessage),
+                                                              sizeof(PortalResponse));
+        if (readedBytes > 0) {
+            logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
+        }
     }
     return responseMessage;
 }

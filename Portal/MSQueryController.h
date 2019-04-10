@@ -11,7 +11,7 @@
 class MSQueryController {
 public:
     MSQueryController(std::string clientRequestFifoPath, std::string clientResponseFifoPath,
-                      std::string servicesResponseFifoPath, FifoWriter *servicesRequestFifos);
+                      std::string servicesResponseFifoPath, std::map<INSTANCE_TYPE, FifoWriter*> servicesRequestFifos);
 
     ~MSQueryController();
 
@@ -23,7 +23,7 @@ private:
     FifoReader *clientRequestFifo;
     FifoWriter *clientResponseFifo;
     FifoReader *servicesResponseFifo;
-    FifoWriter *servicesRequestFifos;
+    std::map<INSTANCE_TYPE, FifoWriter*> servicesRequestFifos;
     std::string servicesResponseFifoPath;
 };
 

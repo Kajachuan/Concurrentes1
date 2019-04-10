@@ -19,10 +19,12 @@ public:
 
     void endPortal();
 
+    std::map<INSTANCE_TYPE, FifoWriter*> getRequestServicesMap();
+
 private:
     static Logger *logger;
     FifoReader *connectionRequestFifo;
-    FifoWriter *servicesRequestFifos;
+    std::map<INSTANCE_TYPE, std::map<std::string, FifoWriter *>> servicesRequestFifos;
     int forkedChilds;
 };
 
