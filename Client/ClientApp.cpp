@@ -27,7 +27,5 @@ int main(int argc, char *argv[]) {
             std::cout << client.portal_request(message) << std::endl;
         }
     }
-
-    logger->logMessage(DEBUG, "Recieved command: " + command);
     Logger::endLogger();
 }

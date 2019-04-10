@@ -11,6 +11,7 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
         std::string servicesResponseFifoPath, FifoWriter *servicesRequestFifos) {
     this->servicesRequestFifos = servicesRequestFifos;
     this->servicesResponseFifoPath = std::move(servicesResponseFifoPath);
+    this->servicesResponseFifo = nullptr;
 
     logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the client in path: "
     + clientResponseFifoPath);
@@ -42,7 +43,7 @@ bool MSQueryController::process_requests() {
     if (readBytes > 0 and !requestMessage.closeConnection) {
         logger->logMessage(DEBUG, "Read request message: " + requestMessage.asString());
         PortalResponse msResponse = getMSResponse(requestMessage);
-        logger->logMessage(DEBUG, "Writing response to client");
+        logger->logMessage(DEBUG, "Writing response to client: " + msResponse.asString());
         clientResponseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
     }
     return requestMessage.closeConnection;
@@ -54,11 +55,10 @@ PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
     logger->logMessage(DEBUG, "Sending request to microservice: " + requestMessage.asString());
     servicesRequestFifos->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
 
-    if (!servicesResponseFifoPath.empty()) {
+    if (servicesResponseFifo == nullptr) {
         logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + servicesResponseFifoPath);
         servicesResponseFifo = new FifoReader(servicesResponseFifoPath);
         servicesResponseFifo->open_fifo();
-        servicesResponseFifoPath = "";
     }
     logger->logMessage(DEBUG, "Reading response fifo from ms");
     PortalResponse responseMessage{};

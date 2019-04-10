@@ -27,7 +27,7 @@ bool PortalController::processConnectionRequests() {
                 logger->logMessage(DEBUG, "MSQueryController request");
                 MSQueryController msQueryController("/tmp/client-query", requestMessage.senderResponseFifoPath,
                                                     "/tmp/ms-query", servicesRequestFifos);
-                while (msQueryController.process_requests()) {};
+                while (!msQueryController.process_requests()) {};
                 return false;
                 break;
             }
