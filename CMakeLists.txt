@@ -18,7 +18,8 @@ set(FIFO IPC/Fifo/Fifo.cpp IPC/Fifo/Fifo.h IPC/Fifo/FifoReader.cpp IPC/Fifo/Fifo
 set(COMMONS Commons/Messages.h Commons/DataRecordManager.h)
 
 # Portal
-set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h)
+set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h
+        Portal/MSQueryController.cpp Portal/MSQueryController.h)
 add_executable(portal ${PORTAL_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
 
 # Microservices

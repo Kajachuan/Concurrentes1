@@ -2,6 +2,7 @@
 #include <cstring>
 #include "PortalController.h"
 #include "../logger/Logger.h"
+#include "MSQueryController.h"
 
 const int BUFFER_SIZE = 100;
 Logger *PortalController::logger = Logger::getInstance("PortalController");
@@ -21,48 +22,41 @@ PortalController::PortalController(std::string responseFifoPath, std::string req
         requestMSFifo->open_fifo();
     }
 
-    logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the client in path: " + responseFifoPath);
-    responseFifo = new FifoWriter(responseFifoPath);
-    responseFifo->open_fifo();
-    logger->logMessage(DEBUG, "Connecting to the fifo that read messages from the client in path: " + requestFifoPath);
+    logger->logMessage(DEBUG, "Connecting to the fifo that read request messages in path: "
+    + requestFifoPath);
     requestFifo = new FifoReader(requestFifoPath);
     requestFifo->open_fifo();
 }
 
 PortalController::~PortalController(){
-    delete responseFifo;
     delete requestFifo;
 }
 
 void PortalController::process_requests() {
-    MSRequest request_message;
-    ssize_t readBytes = requestFifo->read_fifo(static_cast<void *>(&request_message), sizeof(request_message));
+    ConnectionRequest requestMessage{};
+    ssize_t readBytes = requestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(requestMessage));
     if (readBytes > 0) {
-        std::string clientRequest = "Service: ";
-        logger->logMessage(DEBUG, request_message.asString());
-        // ... Aca voy a pedir las cosas a los ms y despues lo devuelvo como se debe
-        PortalResponse msResponse = getMSResponse(request_message);
-        logger->logMessage(DEBUG, "Writing response to client");
-        responseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
+        switch(requestMessage.instanceType) {
+            case CLIENT: {
+                logger->logMessage(DEBUG, "MSQueryController request");
+                MSQueryController msQueryController("/tmp/client-query", requestMessage.senderResponseFifoPath,
+                                                    "/tmp/query-ms", requestMSFifo);
+                msQueryController.process_requests();
+                break;
+            }
+            case WEATHER_MICROSERVICE: {
+                logger->logMessage(DEBUG, "WEATHER_MICROSERVICE registration request");
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                logger->logMessage(DEBUG, "EXCHANGE_MICROSERVICE registration request");
+                break;
+            }
+            default: {
+                logger->logMessage(DEBUG, "Wrong message, instanceType: " +
+                std::string(serviceNames[requestMessage.instanceType]));
+                break;
+            }
+        }
     }
-}
-
-PortalResponse PortalController::getMSResponse(MSRequest requestMessage) {
-    std::string responseMSFifoPath = "/tmp/testResponseFifo";
-    strcpy(requestMessage.responseFifoPath, responseMSFifoPath.c_str());
-    requestMessage.closeConnection = false;
-    logger->logMessage(DEBUG, "Sending response fifo path to ms and request: " + requestMessage.asString());
-    requestMSFifo->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
-
-    logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + responseMSFifoPath);
-    FifoReader responseMSFifo(responseMSFifoPath);
-    responseMSFifo.open_fifo();
-    logger->logMessage(DEBUG, "Reading response fifo from ms");
-    PortalResponse responseMessage{};
-    ssize_t readedBytes = responseMSFifo.read_fifo(static_cast<void *>(&responseMessage),
-            sizeof(PortalResponse));
-    if (readedBytes > 0) {
-        logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
-    }
-    return responseMessage;
 }

@@ -9,15 +9,15 @@
 class ClientController {
 public:
     static Logger *logger;
-    ClientController(std::string output_fifo_path_name, std::string input_fifo_path_name);
+    ClientController(std::string registerRequestFifoPathName, std::string responseFifoPathName);
 
     ~ClientController();
 
     std::string portal_request(std::string request_message);
 
 private:
-    FifoReader *input;
-    FifoWriter *output;
+    FifoReader *responseFifo;
+    FifoWriter *requestFifo;
 };
 
 

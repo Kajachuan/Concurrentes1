@@ -52,7 +52,7 @@ void CRUDMicroserviceController<DataRecord>::addRecord(std::string code, DataRec
 template <class DataRecord>
 void CRUDMicroserviceController<DataRecord>::processRequest() {
     logger->logMessage(DEBUG, "Reading request fifo");
-    MSRequest requestMessage;
+    MSRequest requestMessage{};
     ssize_t readedBytes = requestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
     if (readedBytes > 0) {
         logger->logMessage(DEBUG, "Received request: " + requestMessage.asString());
@@ -68,7 +68,7 @@ void CRUDMicroserviceController<DataRecord>::processRequest() {
         } else {
             PortalResponse response_message{};
             response_message.found = false;
-            response_message.service = dataRecordManager->getServiceName();
+            response_message.instanceType = dataRecordManager->getServiceName();
             if (requestMessage.method == READ) {
                 logger->logMessage(DEBUG, std::string("Reading: ") + requestMessage.code);
                 if (data.count(requestMessage.code) > 0) {

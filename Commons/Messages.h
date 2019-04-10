@@ -4,9 +4,12 @@
 #include <map>
 #include <sstream>
 
-enum Service {
-    WEATHER,
-    EXCHANGE
+enum INSTANCE_TYPE {
+    WEATHER_MICROSERVICE,
+    EXCHANGE_MICROSERVICE,
+    CLIENT,
+    PORTAL,
+    MS_QUERY_CONTROLLER
 };
 
 enum Method {
@@ -15,8 +18,9 @@ enum Method {
 };
 
 const std::map<char, Method> CHAR_TO_METHOD = {{'r', READ}, {'w', WRITE}};
-const std::map<char, Service> CHAR_TO_SERVICE = {{'w', WEATHER}, {'c', EXCHANGE}};
-static const char *serviceNames[] = {"WEATHER", "CHANGE"};
+const std::map<char, INSTANCE_TYPE> CHAR_TO_SERVICE = {{'w', WEATHER_MICROSERVICE}, {'c', EXCHANGE_MICROSERVICE}};
+static const char *serviceNames[] = {"WEATHER_MICROSERVICE", "EXCHANGE_MICROSERVICE", "CLIENT", "PORTAL",
+                                     "MS_QUERY_CONTROLLER"};
 static const char *methodNames[] = {"READ", "WRITE"};
 
 struct WeatherRecord {
@@ -46,7 +50,7 @@ struct ExchangeRecord {
 };
 
 struct PortalResponse {
-    Service service;
+    INSTANCE_TYPE instanceType;
     union {
         WeatherRecord weatherRecord;
         ExchangeRecord exchangeRecord;
@@ -55,9 +59,9 @@ struct PortalResponse {
 
     std::string asString() {
         std::stringstream response_message;
-        response_message  << "service: " <<  serviceNames[service] <<"; found: "
+        response_message  << "instanceType: " <<  serviceNames[instanceType] <<"; found: "
                           << found << "; record: ";
-        if (service == WEATHER) {
+        if (instanceType == WEATHER_MICROSERVICE) {
             response_message << weatherRecord.asString() << std::endl;
         }
         return response_message.str();
@@ -66,19 +70,20 @@ struct PortalResponse {
 
 struct MSRequest {
     Method method;
-    Service service;
+    INSTANCE_TYPE instanceType;
+    char responseFifoPath[50];
+    char code[3];
+    bool closeConnection;
     union {
         WeatherRecord weatherRecord;
         ExchangeRecord exchangeRecord;
     };
-    char responseFifoPath[50];
-    char code[3];
-    bool closeConnection;
 
     std::string asString() {
         std::string representation = "Method: ";
         representation = representation + methodNames[method] + ", Code: " + code;
-        if (service == WEATHER) {
+        representation = representation + ", responseFifoPath: " + responseFifoPath;
+        if (instanceType == WEATHER_MICROSERVICE) {
             representation = representation + ", Data: " + weatherRecord.asString();
         }
         if (closeConnection) {
@@ -88,6 +93,11 @@ struct MSRequest {
         }
         return representation;
     }
+};
+
+struct ConnectionRequest {
+    char senderResponseFifoPath[50];
+    INSTANCE_TYPE instanceType;
 };
 
 #endif //PRIMER_PROYECTO_MESSAGE_H

@@ -18,10 +18,8 @@ public:
     void process_requests();
 
 private:
-    PortalResponse getMSResponse(MSRequest);
     static Logger *logger;
     FifoReader *requestFifo;
-    FifoWriter *responseFifo;
     FifoWriter *requestMSFifo;
 };
 

@@ -6,7 +6,7 @@ class DataRecordManager {
 public:
     virtual void setRecordToResponse(PortalResponse*, DataRecord) = 0;
     virtual DataRecord getRecordFromRequest(MSRequest) = 0;
-    virtual Service getServiceName() = 0;
+    virtual INSTANCE_TYPE getServiceName() = 0;
 };
 
 class WeatherRecordManager: public DataRecordManager<WeatherRecord> {
@@ -17,8 +17,8 @@ public:
     WeatherRecord getRecordFromRequest(MSRequest msRequest) {
         return  msRequest.weatherRecord;
     }
-    Service getServiceName() {
-        return  WEATHER;
+    INSTANCE_TYPE getServiceName() {
+        return  WEATHER_MICROSERVICE;
     }
 };
 
@@ -30,8 +30,8 @@ public:
     ExchangeRecord getRecordFromRequest(MSRequest msRequest) {
         return  msRequest.exchangeRecord;
     }
-    Service getServiceName() {
-        return  EXCHANGE;
+    INSTANCE_TYPE getServiceName() {
+        return  EXCHANGE_MICROSERVICE;
     }
 };
 
