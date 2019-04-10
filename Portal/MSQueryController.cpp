@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <iostream>
 #include <cstring>
 #include "MSQueryController.h"
@@ -8,7 +10,7 @@ Logger *MSQueryController::logger = Logger::getInstance("MSQueryController");
 MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::string clientResponseFifoPath,
         std::string servicesResponseFifoPath, FifoWriter *servicesRequestFifos) {
     this->servicesRequestFifos = servicesRequestFifos;
-    this->servicesResponseFifoPath = servicesResponseFifoPath;
+    this->servicesResponseFifoPath = std::move(servicesResponseFifoPath);
 
     logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the client in path: "
     + clientResponseFifoPath);
@@ -34,15 +36,16 @@ MSQueryController::~MSQueryController(){
     delete servicesResponseFifo;
 }
 
-void MSQueryController::process_requests() {
+bool MSQueryController::process_requests() {
     MSRequest requestMessage{};
     ssize_t readBytes = clientRequestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
-    if (readBytes > 0) {
+    if (readBytes > 0 and !requestMessage.closeConnection) {
         logger->logMessage(DEBUG, "Read request message: " + requestMessage.asString());
         PortalResponse msResponse = getMSResponse(requestMessage);
         logger->logMessage(DEBUG, "Writing response to client");
         clientResponseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
     }
+    return requestMessage.closeConnection;
 }
 
 PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {

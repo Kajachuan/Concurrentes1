@@ -4,12 +4,13 @@
 #include "../logger/Logger.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../IPC/Fifo/FifoReader.h"
+#include "../Commons/Messages.h"
 #include <map>
 
 class MicroserviceController {
 public:
-
-    MicroserviceController(std::string output_fifo_path_name, std::string input_fifo_path_name);
+    MicroserviceController(std::string registerRequestFifoPathName, std::string requestFifoPathName,
+                           INSTANCE_TYPE instanceType);
 
     ~MicroserviceController();
 

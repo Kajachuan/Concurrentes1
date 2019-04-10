@@ -15,7 +15,7 @@ public:
 
     ~MSQueryController();
 
-    void process_requests();
+    bool process_requests();
 
 private:
     PortalResponse getMSResponse(MSRequest);

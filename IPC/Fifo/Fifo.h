@@ -15,6 +15,8 @@ public:
 
     virtual void open_fifo() = 0;
 
+    void deleteFifo();
+
 protected:
     std::string path_name;
     int fd;

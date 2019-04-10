@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
     auto logger = Logger::getInstance("client main");
     Logger::setLogLevel(DEBUG);
-    ClientController client("/tmp/client-portal", "/tmp/portal-client");
+    ClientController client("/tmp/register-portal", "/tmp/portal-client");
     std::string command;
 
     while (command!= "end") {

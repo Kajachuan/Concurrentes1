@@ -11,7 +11,8 @@ int main(int argc, char const *argv[]) {
     auto logger = Logger::getInstance("ms main");
     Logger::setLogLevel(DEBUG);
     WeatherRecordManager recordManager;
-    CRUDMicroserviceController<WeatherRecord> msController("/tmp/ms-portal", "/tmp/portal-ms", &recordManager);
+    CRUDMicroserviceController<WeatherRecord> msController("/tmp/register-portal",
+            "/tmp/query-ms", WEATHER_MICROSERVICE, &recordManager);
 
     std::ifstream records("../weather.csv");
     if(records.fail()) logger->logMessage(WARNING, "An error occurred while load DB");

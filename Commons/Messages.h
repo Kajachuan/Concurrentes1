@@ -84,7 +84,9 @@ struct MSRequest {
         representation = representation + methodNames[method] + ", Code: " + code;
         representation = representation + ", responseFifoPath: " + responseFifoPath;
         if (instanceType == WEATHER_MICROSERVICE) {
-            representation = representation + ", Data: " + weatherRecord.asString();
+            representation = representation + ", Weather Data: " + weatherRecord.asString();
+        } else {
+            representation = representation + ", Exchange Data: " + exchangeRecord.asString();
         }
         if (closeConnection) {
             representation = representation + ", closeConnection: true";

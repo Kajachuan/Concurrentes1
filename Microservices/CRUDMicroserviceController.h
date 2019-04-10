@@ -15,8 +15,8 @@
 template <class DataRecord>
 class CRUDMicroserviceController: public MicroserviceController {
 public:
-    CRUDMicroserviceController(std::string output_fifo_path_name, std::string input_fifo_path_name,
-            DataRecordManager<DataRecord> *dataRecordManager);
+    CRUDMicroserviceController(std::string registerRequestFifoPathName, std::string requestFifoPathName,
+            INSTANCE_TYPE instanceType, DataRecordManager<DataRecord> *dataRecordManager);
     ~CRUDMicroserviceController();
     void processRequest() override;
     void addRecord(std::string code, DataRecord record);
@@ -33,13 +33,14 @@ template <class DataRecord>
 Logger *CRUDMicroserviceController<DataRecord>::logger = Logger::getInstance("CRUDMicroserviceController" +
                                                                              std::string(typeid(DataRecord).name()));
 
-template <class DataRecord>
-CRUDMicroserviceController<DataRecord>::CRUDMicroserviceController(std::string output_fifo_path_name,
-                                                                   std::string input_fifo_path_name,
-                                                                   DataRecordManager<DataRecord> *dataRecordManager)
-        : MicroserviceController(output_fifo_path_name, input_fifo_path_name) {
-    this->dataRecordManager = dataRecordManager;
-}
+
+
+template<class DataRecord>
+CRUDMicroserviceController<DataRecord>::CRUDMicroserviceController(std::string registerRequestFifoPathName,
+        std::string requestFifoPathName, INSTANCE_TYPE instanceType, DataRecordManager<DataRecord> *dataRecordManager):
+        MicroserviceController(registerRequestFifoPathName, requestFifoPathName, instanceType) {
+            this->dataRecordManager = dataRecordManager;
+        }
 
 template <class DataRecord>
 CRUDMicroserviceController<DataRecord>::~CRUDMicroserviceController() = default;

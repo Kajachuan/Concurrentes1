@@ -10,17 +10,16 @@
 
 class PortalController {
 public:
-    PortalController(std::string responseFifoPath, std::string requestFifoPath,
-            std::string registerMSFifoPath);
+    explicit PortalController(std::string connectionRequestFifoPath);
 
     ~PortalController();
 
-    void process_requests();
+    bool processConnectionRequests();
 
 private:
     static Logger *logger;
-    FifoReader *requestFifo;
-    FifoWriter *requestMSFifo;
+    FifoReader *connectionRequestFifo;
+    FifoWriter *servicesRequestFifos;
 };
 
 #endif /* PORTAL_CONTROLLER_H_ */

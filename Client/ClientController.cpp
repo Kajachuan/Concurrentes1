@@ -10,6 +10,7 @@ ClientController::ClientController(const std::string registerRequestFifoPathName
         const std::string responseFifoPathName) {
     logger->logMessage(DEBUG, "Connecting to the fifo to register client to portal: "+ registerRequestFifoPathName);
     FifoWriter registerRequestFifo(registerRequestFifoPathName);
+    logger->logMessage(DEBUG, "openinn "+ registerRequestFifoPathName);
     registerRequestFifo.open_fifo();
     ConnectionRequest connectionRequest{"", CLIENT};
     std::strcpy(connectionRequest.senderResponseFifoPath, responseFifoPathName.c_str());
@@ -21,7 +22,7 @@ ClientController::ClientController(const std::string registerRequestFifoPathName
 
     ssize_t readBytes = responseFifo->read_fifo(static_cast<void *>(&connectionRequest), sizeof(connectionRequest));
     if (readBytes > 0 and connectionRequest.instanceType == MS_QUERY_CONTROLLER) {
-        logger->logMessage(DEBUG, "Connecting to the fifo that writes messages from the portal: " +
+        logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the portal: " +
         std::string(connectionRequest.senderResponseFifoPath));
         requestFifo = new FifoWriter(connectionRequest.senderResponseFifoPath);
         requestFifo->open_fifo();
@@ -32,6 +33,9 @@ ClientController::ClientController(const std::string registerRequestFifoPathName
 }
 
 ClientController::~ClientController() {
+    MSRequest requestMessage{};
+    requestMessage.closeConnection = true;
+    requestFifo->write_fifo(static_cast<const void *>(&requestMessage), sizeof(requestMessage));
     delete responseFifo;
     delete requestFifo;
 }

@@ -1,16 +1,23 @@
+#include <cstring>
 #include "MicroserviceController.h"
+#include "../Commons/Messages.h"
 
 Logger *MicroserviceController::logger = Logger::getInstance("MicroserviceController");
 
-MicroserviceController::MicroserviceController(std::string output_fifo_path_name, std::string input_fifo_path_name) {
-    logger->logMessage(DEBUG, "Registering to portal with fifo path: " + output_fifo_path_name);
-    FifoWriter registerFifo(output_fifo_path_name);
-    registerFifo.open_fifo();
-    registerFifo.write_fifo(static_cast<const void *>(input_fifo_path_name.c_str()), input_fifo_path_name.length());
+MicroserviceController::MicroserviceController(std::string registerRequestFifoPathName, std::string requestFifoPathName,
+                                               INSTANCE_TYPE instanceType) {
+    logger->logMessage(DEBUG, "Connecting to the fifo to register MS to portal: "+ registerRequestFifoPathName);
+    FifoWriter registerRequestFifo(registerRequestFifoPathName);
+    registerRequestFifo.open_fifo();
+    ConnectionRequest connectionRequest{"", instanceType};
+    std::strcpy(connectionRequest.senderResponseFifoPath, requestFifoPathName.c_str());
+    registerRequestFifo.write_fifo(static_cast<void *>(&connectionRequest), sizeof(ConnectionRequest));
 
-    logger->logMessage(DEBUG, "Opening request fifo with path: " + input_fifo_path_name);
-    requestFifo = new FifoReader(input_fifo_path_name);
+    logger->logMessage(DEBUG, "Opening request microservice fifo with path: " + requestFifoPathName);
+    requestFifo = new FifoReader(requestFifoPathName);
     requestFifo->open_fifo();
 }
 
-MicroserviceController::~MicroserviceController() = default;
+MicroserviceController::~MicroserviceController() {
+    delete requestFifo;
+}
