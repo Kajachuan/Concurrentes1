@@ -28,11 +28,18 @@ int main(int argc, char *argv[]) {
         }
 
         else if (command!= "end") {
+          try {
             MSRequest message{};
             message.instanceType = CHAR_TO_SERVICE.at(command.at(0));
             message.method = CHAR_TO_METHOD.at(command.at(1));
             strcpy(message.code, command.substr(2, 3).c_str());
             std::cout << client.portal_request(message) << std::endl;
+          }
+
+          catch(...) {
+            logger->logMessage(ERROR, "Unknown command: " + command);
+            std::cout << "Unknown command." << std::endl;
+          }
         }
     }
     Logger::endLogger();
