@@ -36,18 +36,17 @@ ClientController::~ClientController() {
     delete requestFifo;
 }
 
-std::string ClientController::portal_request(std::string request_message) {
-    logger->logMessage(INFO, "Sending client request to portal: " + request_message);
-
-    MSRequest message{};
-    message.instanceType = CHAR_TO_SERVICE.at(request_message.at(0));
-    message.method = CHAR_TO_METHOD.at(request_message.at(1));
-    strcpy(message.code, request_message.substr(2, 3).c_str());
-    requestFifo->write_fifo(static_cast<const void *>(&message), sizeof(message));
+std::string ClientController::portal_request(MSRequest requestMessage) {
+    logger->logMessage(INFO, "Sending client request to portal: " + requestMessage.asString());
+    requestFifo->write_fifo(static_cast<const void *>(&requestMessage), sizeof(requestMessage));
 
     PortalResponse portalResponse{};
     ssize_t readedBytes = responseFifo->read_fifo(static_cast<void *>(&portalResponse),
             sizeof(PortalResponse));
-    logger->logMessage(INFO, "Received response from the portal: " + portalResponse.asString());
+    if (readedBytes > 0) {
+        logger->logMessage(INFO, "Received response from the portal: " + portalResponse.asString());
+    } else {
+        logger->logMessage(ERROR, "No response from portal");
+    }
     return portalResponse.asString();
 }

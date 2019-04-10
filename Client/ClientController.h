@@ -13,7 +13,7 @@ public:
 
     ~ClientController();
 
-    std::string portal_request(std::string request_message);
+    std::string portal_request(MSRequest requestMessage);
 
 private:
     FifoReader *responseFifo;
