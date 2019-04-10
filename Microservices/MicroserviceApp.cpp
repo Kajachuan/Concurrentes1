@@ -5,13 +5,15 @@
 #include "../Commons/Messages.h"
 #include "CRUDMicroserviceController.h"
 
+char LINES_SEPARATOR = ',';
+
 int main(int argc, char const *argv[]) {
     auto logger = Logger::getInstance("ms main");
     Logger::setLogLevel(DEBUG);
     WeatherRecordManager recordManager;
     CRUDMicroserviceController<WeatherRecord> msController("/tmp/ms-portal", "/tmp/portal-ms", &recordManager);
 
-    std::ifstream records("weather.csv");
+    std::ifstream records("../weather.csv");
     if(records.fail()) logger->logMessage(WARNING, "An error occurred while load DB");
     std::string line;
     while(getline(records, line)) {
@@ -19,7 +21,7 @@ int main(int argc, char const *argv[]) {
       std::string parsed;
       WeatherRecord wrec;
       int i = 0;
-      while(getline(sline, parsed, ',')) {
+      while(getline(sline, parsed, LINES_SEPARATOR)) {
         if(i == 0) strcpy(wrec.code, parsed.c_str());
         else if(i == 1) strcpy(wrec.name, parsed.c_str());
         else if(i == 2) wrec.temperature = stof(parsed);
@@ -35,7 +37,21 @@ int main(int argc, char const *argv[]) {
     while(true) {
         msController.processRequest();
         logger->logMessage(DEBUG, "Processed request");
-        sleep(2);
+        //sleep(2);
     }
+
+    logger->logMessage(DEBUG, "Saving DB");
+    std::ofstream new_records("wheather.csv");
+    std::list<WeatherRecord> data_to_save = msController.getRecords();
+    for (auto it = data_to_save.begin(); it != data_to_save.end(); ++it) {
+        WeatherRecord record = *it;
+        new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record
+                .temperature << LINES_SEPARATOR << record.pressure << LINES_SEPARATOR << record
+                .humidity;
+        logger->logMessage(DEBUG, "Saved " + record.asString());
+    }
+    new_records.close();
+    logger->logMessage(DEBUG, "Finished saving DB");
+
     Logger::endLogger();
 }

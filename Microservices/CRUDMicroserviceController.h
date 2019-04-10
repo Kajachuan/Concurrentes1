@@ -2,7 +2,9 @@
 #define PRIMER_PROYECTO_CRUDMICROSERVICECONTROLLER_H
 
 #include <string>
+#include <list>
 #include <map>
+#include <typeinfo>
 #include "../logger/Logger.h"
 #include "MicroserviceController.h"
 #include "CRUDMicroserviceController.h"
@@ -18,6 +20,8 @@ public:
     ~CRUDMicroserviceController();
     void processRequest() override;
     void addRecord(std::string code, DataRecord record);
+    std::list<DataRecord> getRecords();
+
 
 private:
     static Logger *logger;
@@ -83,5 +87,14 @@ void CRUDMicroserviceController<DataRecord>::processRequest() {
 
     }
 }
+
+template <class DataRecord>
+std::list<DataRecord> CRUDMicroserviceController<DataRecord>::getRecords() {
+    std::list<DataRecord> records;
+    for (typename std::map<std::string, DataRecord>::iterator it = data.begin(); it != data.end(); ++it)
+        records.push_back(it->second);
+    return records;
+}
+
 
 #endif //PRIMER_PROYECTO_CRUDMICROSERVICECONTROLLER_H
