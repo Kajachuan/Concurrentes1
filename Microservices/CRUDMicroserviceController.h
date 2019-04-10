@@ -18,7 +18,7 @@ public:
     CRUDMicroserviceController(std::string registerRequestFifoPathName, std::string requestFifoPathName,
             INSTANCE_TYPE instanceType, DataRecordManager<DataRecord> *dataRecordManager);
     ~CRUDMicroserviceController();
-    void processRequest() override;
+    bool processRequest() override;
     void addRecord(std::string code, DataRecord record);
     std::list<DataRecord> getRecords();
 
@@ -51,7 +51,7 @@ void CRUDMicroserviceController<DataRecord>::addRecord(std::string code, DataRec
 }
 
 template <class DataRecord>
-void CRUDMicroserviceController<DataRecord>::processRequest() {
+bool CRUDMicroserviceController<DataRecord>::processRequest() {
     logger->logMessage(DEBUG, "Reading request fifo");
     MSRequest requestMessage{};
     ssize_t readedBytes = requestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
@@ -85,8 +85,9 @@ void CRUDMicroserviceController<DataRecord>::processRequest() {
                                                                        sizeof(PortalResponse));
             logger->logMessage(DEBUG, "Sending response: " + response_message.asString());
         }
-
+        return requestMessage.closeConnection;
     }
+    return false;
 }
 
 template <class DataRecord>

@@ -35,17 +35,15 @@ int main(int argc, char const *argv[]) {
     }
     records.close();
 
-    while(true) {
-        msController.processRequest();
-        logger->logMessage(DEBUG, "Processed request");
-        //sleep(2);
+    logger->logMessage(DEBUG, "Start processing requests");
+    while(!msController.processRequest()) {
+        sleep(2);
     }
 
     logger->logMessage(DEBUG, "Saving DB");
     std::ofstream new_records("wheather.csv");
     std::list<WeatherRecord> data_to_save = msController.getRecords();
-    for (auto it = data_to_save.begin(); it != data_to_save.end(); ++it) {
-        WeatherRecord record = *it;
+    for(auto record : data_to_save) {
         new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record
                 .temperature << LINES_SEPARATOR << record.pressure << LINES_SEPARATOR << record
                 .humidity;

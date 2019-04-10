@@ -14,7 +14,7 @@ public:
 
     ~MicroserviceController();
 
-    virtual void processRequest() = 0;
+    virtual bool processRequest() = 0;
 
 protected:
     FifoReader *requestFifo;
