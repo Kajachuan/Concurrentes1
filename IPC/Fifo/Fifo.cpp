@@ -14,10 +14,10 @@ Fifo::Fifo(const std::string path_name) : path_name(path_name), fd(-1) {
     } else {
         struct stat file_stat{};
         // Checks if the existing file is a fifo
-        //if (not fstat(open(path_name.c_str(), O_WRONLY), &file_stat) && not S_ISFIFO(file_stat.st_mode)) {
-        //    throw FileExistsException("Error during fifo creation, file: " + path_name +
-        //                              " already exists and it is not a fifo");
-        //}
+        if (not fstat(open(path_name.c_str(), O_RDONLY | O_NONBLOCK), &file_stat) && not S_ISFIFO(file_stat.st_mode)) {
+            throw FileExistsException("Error during fifo creation, file: " + path_name +
+                                      " already exists and it is not a fifo");
+        }
     }
 }
 
