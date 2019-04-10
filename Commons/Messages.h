@@ -87,6 +87,10 @@ struct MSRequest {
     char responseFifoPath[50];
     char code[3];
     bool closeConnection;
+    float temperature;
+    float pressure;
+    float humidity;
+    float exchange;
     union {
         WeatherRecord weatherRecord;
         ExchangeRecord exchangeRecord;
