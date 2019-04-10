@@ -22,7 +22,7 @@ public:
     }
 };
 
-class ExchangeRecordRecordManager: public DataRecordManager<ExchangeRecord> {
+class ExchangeRecordManager: public DataRecordManager<ExchangeRecord> {
 public:
     void setRecordToResponse(PortalResponse *portalResponse, ExchangeRecord dataRecord) {
         portalResponse->exchangeRecord = dataRecord;

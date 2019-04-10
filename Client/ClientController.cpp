@@ -10,7 +10,6 @@ ClientController::ClientController(const std::string registerRequestFifoPathName
         const std::string responseFifoPathName) {
     logger->logMessage(DEBUG, "Connecting to the fifo to register client to portal: "+ registerRequestFifoPathName);
     FifoWriter registerRequestFifo(registerRequestFifoPathName);
-    logger->logMessage(DEBUG, "openinn "+ registerRequestFifoPathName);
     registerRequestFifo.open_fifo();
     ConnectionRequest connectionRequest{"", CLIENT};
     std::strcpy(connectionRequest.senderResponseFifoPath, responseFifoPathName.c_str());

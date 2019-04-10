@@ -41,6 +41,7 @@ struct WeatherRecord {
 struct ExchangeRecord {
     float exchange;
     char name[20];
+    char code[3];
 
     std::string asString() {
         std::stringstream response_message;
@@ -62,8 +63,19 @@ struct PortalResponse {
         std::stringstream response_message;
         response_message  << "instanceType: " <<  serviceNames[instanceType] <<"; found: "
                           << found << "; record: ";
-        if (instanceType == WEATHER_MICROSERVICE) {
-            response_message << weatherRecord.asString() << std::endl;
+
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                response_message << weatherRecord.asString() << std::endl;
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                response_message << exchangeRecord.asString() << std::endl;
+                break;
+            }
+            default:
+                response_message << "Unexpected instance type" << std::endl;
+                break;
         }
         return response_message.str();
     }
