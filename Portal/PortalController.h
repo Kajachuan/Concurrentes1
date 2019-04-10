@@ -2,6 +2,7 @@
 #define PORTAL_CONTROLLER_H_
 
 #include <string>
+#include <vector>
 
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
@@ -14,12 +15,15 @@ public:
 
     ~PortalController();
 
-    bool processConnectionRequests();
+    int processConnectionRequests();
+
+    void endPortal();
 
 private:
     static Logger *logger;
     FifoReader *connectionRequestFifo;
     FifoWriter *servicesRequestFifos;
+    int forkedChilds;
 };
 
 #endif /* PORTAL_CONTROLLER_H_ */

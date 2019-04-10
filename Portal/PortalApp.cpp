@@ -6,6 +6,12 @@ int main(int argc, char const *argv[]) {
     Logger::setLogLevel(DEBUG);
     auto portal = PortalController("/tmp/register-portal");
     logger->logMessage(DEBUG, "Start processing");
-    while (portal.processConnectionRequests()) {};
+    int processResult = portal.processConnectionRequests();
+    while (processResult > 0) {
+        processResult = portal.processConnectionRequests();
+    };
+    if (processResult < 0) {
+        portal.endPortal();
+    }
     Logger::endLogger();
 }

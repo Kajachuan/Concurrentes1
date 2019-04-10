@@ -27,10 +27,6 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
 }
 
 MSQueryController::~MSQueryController(){
-    logger->logMessage(DEBUG, "Sending close connection to services");
-    MSRequest requestMessage{};
-    requestMessage.closeConnection = false;
-    servicesRequestFifos->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
     delete clientResponseFifo;
     delete clientRequestFifo;
     delete servicesRequestFifos;
