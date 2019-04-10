@@ -13,13 +13,15 @@ set(FILE_EXIST_EXCEPTION Exceptions/FileExistsException.cpp Exceptions/FileExist
 # IPC
 set(FIFO IPC/Fifo/Fifo.cpp IPC/Fifo/Fifo.h IPC/Fifo/FifoReader.cpp IPC/Fifo/FifoReader.h
         IPC/Fifo/FifoWriter.cpp IPC/Fifo/FifoWriter.h ${MKNOD_EXCEPTION} ${FILE_EXIST_EXCEPTION})
+set(SIGNAL IPC/Signal/EventHandler.h IPC/Signal/SIGINTShutdownHandler.h IPC/Signal/SignalHandler.cpp
+        IPC/Signal/SignalHandler.h)
 
 # Commons
 set(COMMONS Commons/Messages.h Commons/DataRecordManager.h)
 
 # Portal
 set(PORTAL_SOURCES Portal/PortalApp.cpp Portal/PortalController.cpp Portal/PortalController.h
-        Portal/MSQueryController.cpp Portal/MSQueryController.h)
+        Portal/MSQueryController.cpp Portal/MSQueryController.h ${SIGNAL})
 add_executable(portal ${PORTAL_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
 
 # Microservices

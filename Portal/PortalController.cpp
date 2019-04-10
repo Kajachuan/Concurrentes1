@@ -55,10 +55,10 @@ int PortalController::processConnectionRequests() {
                     MSQueryController msQueryController(clientRequestFifoPath, requestMessage.senderResponseFifoPath,
                                                         servicesResponseFifoPath, getRequestServicesMap());
                     while (!msQueryController.process_requests()) {};
+                    return false;
                 } else {
                     forkedChilds++;
                 }
-                return pid;
             }
             case EXCHANGE_MICROSERVICE:
             case WEATHER_MICROSERVICE: {
