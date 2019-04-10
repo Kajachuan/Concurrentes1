@@ -41,7 +41,7 @@ int main(int argc, char const *argv[]) {
     }
 
     logger->logMessage(DEBUG, "Saving DB");
-    std::ofstream new_records("wheather.csv");
+    std::ofstream new_records("../weather.csv");
     std::list<WeatherRecord> data_to_save = msController.getRecords();
     for(auto record : data_to_save) {
         new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record
