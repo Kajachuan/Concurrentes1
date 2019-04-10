@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
                                 try {
                                     std::cout << "Insert temperature: ";
                                     std::cin >> temperature;
-                                    message.temperature = stof(temperature);
+                                    message.weatherRecord.temperature = stof(temperature);
                                     break;
                                 }
                                 catch (...) {
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
                                 try {
                                     std::cout << "Insert pressure: ";
                                     std::cin >> pressure;
-                                    message.pressure = stof(pressure);
+                                    message.weatherRecord.pressure = stof(pressure);
                                     break;
                                 }
                                 catch (...) {
@@ -68,28 +68,35 @@ int main(int argc, char *argv[]) {
                                 try {
                                     std::cout << "Insert humidity: ";
                                     std::cin >> humidity;
-                                    message.humidity = stof(humidity);
+                                    message.weatherRecord.humidity = stof(humidity);
                                     break;
                                 }
                                 catch (...) {
                                     std::cout << "Invalid value. Try again" << std::endl;
                                 }
                             }
+                            std::cout << "Insert name: ";
+                            std::cin >> humidity;
+                            std::strcpy(message.exchangeRecord.name, humidity.c_str());
                         } else {
                             std::string exchange;
                             while (true) {
                                 try {
                                     std::cout << "Insert exchange: ";
                                     std::cin >> exchange;
-                                    message.exchange = stof(exchange);
+                                    message.exchangeRecord.exchange = stof(exchange);
                                     break;
                                 }
                                 catch (...) {
                                     std::cout << "Invalid value. Try again" << std::endl;
                                 }
                             }
+                            std::cout << "Insert name: ";
+                            std::cin >> exchange;
+                            std::strcpy(message.exchangeRecord.name, exchange.c_str());
                         }
                     }
+                    std::cout << message.asString() << std::endl;
                     std::cout << client.portal_request(message) << std::endl;
                 } else {
                     std::cout << "Invalid command w for weather, c for exchange, r for read, w for write" << std::endl;
