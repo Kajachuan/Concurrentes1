@@ -78,19 +78,9 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
                 }
             } else {
                 logger->logMessage(DEBUG, std::string("Writing: ") + requestMessage.code);
-                if(requestMessage.instanceType == WEATHER_MICROSERVICE) {
-                  data[requestMessage.code].temperature = requestMessage.temperature;
-                  data[requestMessage.code].pressure = requestMessage.pressure;
-                  data[requestMessage.code].humidity = requestMessage.humidity;
-                  response_message.found = true;
-                  dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
-                }
-
-                // else {
-                //   data[requestMessage.code].exchange = requestMessage.exchange;
-                //   response_message.found = true;
-                //   dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
-                // }
+                addRecord(requestMessage.code, dataRecordManager->getRecordFromRequest(requestMessage));
+                response_message.found = true;
+                dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
             }
             responseFifos[requestMessage.responseFifoPath]->write_fifo(static_cast<const void *>(&response_message),
                                                                        sizeof(PortalResponse));
