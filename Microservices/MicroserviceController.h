@@ -1,7 +1,7 @@
 #ifndef PRIMER_PROYECTO_MICROSERVICECONTROLLER_H
 #define PRIMER_PROYECTO_MICROSERVICECONTROLLER_H
 
-#include "../logger/Logger.h"
+#include "../Logger/Logger.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../IPC/Fifo/FifoReader.h"
 #include "../Commons/Messages.h"

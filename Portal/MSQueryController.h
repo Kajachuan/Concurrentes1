@@ -6,7 +6,7 @@
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../Commons/Messages.h"
-#include "../logger/Logger.h"
+#include "../Logger/Logger.h"
 
 class MSQueryController {
 public:

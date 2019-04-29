@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include "MSQueryController.h"
-#include "../logger/Logger.h"
+#include "../Logger/Logger.h"
 
 Logger *MSQueryController::logger = Logger::getInstance("MSQueryController");
 
