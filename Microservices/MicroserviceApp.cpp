@@ -43,9 +43,7 @@ int main(int argc, char const *argv[]) {
         records.close();
 
         logger->logMessage(DEBUG, "Start processing requests");
-        while (!msController->processRequest()) {
-            sleep(2);
-        }
+        while (!msController->processRequest()) { }
 
         logger->logMessage(DEBUG, "Finished saving DB");
         logger->logMessage(DEBUG, "Saving DB");
