@@ -3,6 +3,7 @@
 
 #include <map>
 #include <sstream>
+#define MAXBUFF 50
 
 enum INSTANCE_TYPE {
     WEATHER_MICROSERVICE,
@@ -32,9 +33,47 @@ struct WeatherRecord {
 
     std::string asString() {
         std::stringstream response_message;
-        response_message  << "name: " <<  name <<"; temperature: " << temperature << "; pressure: " << pressure
-                          << "; humidity: " << humidity;
+        response_message << "name: " << name << "; temperature: " << temperature << "; pressure: "
+                         << pressure << "; humidity: " << humidity;
         return response_message.str();
+    }
+
+    void serialize(char* serialized) {
+        float* floated_serialized = (float*) serialized;
+        *floated_serialized = temperature;
+        floated_serialized++;
+        *floated_serialized = pressure;
+        floated_serialized++;
+        *floated_serialized = humidity;
+        floated_serialized++;
+        char* char_serialized = (char*) floated_serialized;
+        for (int i = 0; i < strlen(code); i++) {
+            *char_serialized = code[i];
+            char_serialized++;
+        }
+        for (int i = 0; i < strlen(name); i++) {
+            *char_serialized = name[i];
+            char_serialized++;
+        }
+    }
+
+    void deserialize(const char* serialized) {
+        float* floated_serialized = (float*) serialized;
+        temperature = *floated_serialized;
+        floated_serialized++;
+        pressure = *floated_serialized;
+        floated_serialized++;
+        humidity = *floated_serialized;
+        floated_serialized++;
+        char* char_serialized = (char*) floated_serialized;
+        for (int i = 0; i < 3; i++) {
+            code[i] = *char_serialized;
+            char_serialized++;
+        }
+        for (int i = 0; i < strlen(char_serialized); i++) {
+            name[i] = *char_serialized;
+            char_serialized++;
+        }
     }
 };
 
@@ -48,6 +87,35 @@ struct ExchangeRecord {
         response_message  << "name: " <<  name <<"; exchange: " << exchange;
         return response_message.str();
     }
+
+    void serialize(char* serialized) {
+        float* float_serialized = (float*) serialized;
+        *float_serialized = exchange;
+        char* char_serialized = (char*) float_serialized;
+        for (int i = 0; i < strlen(code); i++) {
+            *char_serialized = code[i];
+            char_serialized++;
+        }
+        for (int i = 0; i < strlen(name); i++) {
+            *char_serialized = name[i];
+            char_serialized++;
+        }
+    }
+
+    void deserialize(const char* serialized) {
+        float* floated_serialized = (float*) serialized;
+        exchange = *floated_serialized;
+        floated_serialized++;
+        char* char_serialized = (char*) floated_serialized;
+        for (int i = 0; i < 3; i++) {
+            code[i] = *char_serialized;
+            char_serialized++;
+        }
+        for (int i = 0; i < strlen(char_serialized); i++) {
+            name[i] = *char_serialized;
+            char_serialized++;
+        }
+    }
 };
 
 struct PortalResponse {
@@ -56,7 +124,7 @@ struct PortalResponse {
         WeatherRecord weatherRecord;
         ExchangeRecord exchangeRecord;
     };
-    bool found;
+    bool found = false;
     bool requestError = false;
 
     std::string asString() {
@@ -79,6 +147,56 @@ struct PortalResponse {
         }
         return response_message.str();
     }
+
+    char* serialize() {
+        char serialized[MAXBUFF];
+        INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
+        *enum_serialized = instanceType;
+        enum_serialized++;
+        bool* bool_serialized = (bool*) enum_serialized;
+        *bool_serialized = found;
+        bool_serialized++;
+        *bool_serialized = requestError;
+        bool_serialized++;
+        char* char_serialized = (char*) bool_serialized;
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                weatherRecord.serialize(char_serialized);
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                exchangeRecord.serialize(char_serialized);
+                break;
+            }
+            default:
+                break;
+        }
+        return serialized;
+    }
+
+    void deserialize(const char* serialized) {
+        INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
+        instanceType = *enum_serialized;
+        enum_serialized++;
+        bool* bool_serialized = (bool*) enum_serialized;
+        found = *bool_serialized;
+        bool_serialized++;
+        *bool_serialized = requestError;
+        bool_serialized++;
+        char* char_serialized = (char*) bool_serialized;
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                weatherRecord.deserialize(char_serialized);
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                exchangeRecord.deserialize(char_serialized);
+                break;
+            }
+            default:
+                break;
+        }
+    }
 };
 
 struct MSRequest {
@@ -87,10 +205,6 @@ struct MSRequest {
     char responseFifoPath[50];
     char code[3];
     bool closeConnection;
-    float temperature;
-    float pressure;
-    float humidity;
-    float exchange;
     union {
         WeatherRecord weatherRecord;
         ExchangeRecord exchangeRecord;
@@ -111,6 +225,79 @@ struct MSRequest {
             representation = representation + ", closeConnection: false";
         }
         return representation;
+    }
+    char* serialize() {
+        char serialized[MAXBUFF];
+        Method* method_serialized = (Method*) serialized;
+        *method_serialized = method;
+        method_serialized++;
+        INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) serialized;
+        *type_serialized = instanceType;
+        type_serialized++;
+        bool* bool_serialized = (bool*) type_serialized;
+        *bool_serialized = closeConnection;
+        bool_serialized++;
+        int* int_serialized = (int*) bool_serialized;
+        *int_serialized = static_cast<int>(strlen(responseFifoPath));
+        int_serialized++;
+        char* char_serialized = (char*) int_serialized;
+        for (int i = 0; i < strlen(responseFifoPath); i++) {
+            *char_serialized = responseFifoPath[i];
+            char_serialized++;
+        }
+        for (int i = 0; i < strlen(code); i++) {
+            *char_serialized = code[i];
+            char_serialized++;
+        }
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                weatherRecord.serialize(char_serialized);
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                exchangeRecord.serialize(char_serialized);
+                break;
+            }
+            default:
+                break;
+        }
+        return serialized;
+    }
+
+    void deserialize(const char* serialized) {
+        Method* method_serialized = (Method*) serialized;
+        method = *method_serialized;
+        method_serialized++;
+        INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) serialized;
+        instanceType = *type_serialized;
+        type_serialized++;
+        bool* bool_serialized = (bool*) type_serialized;
+        closeConnection = *bool_serialized;
+        bool_serialized++;
+        int* int_serialized = (int*) bool_serialized;
+        int responseFifoPathLength = *int_serialized;
+        int_serialized++;
+        char* char_serialized = (char*) int_serialized;
+        for (int i = 0; i < responseFifoPathLength; i++) {
+            responseFifoPath[i] = *char_serialized;
+            char_serialized++;
+        }
+        for (int i = 0; i < 3; i++) {
+            code[i] = *char_serialized;
+            char_serialized++;
+        }
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                weatherRecord.deserialize(char_serialized);
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                exchangeRecord.deserialize(char_serialized);
+                break;
+            }
+            default:
+                break;
+        }
     }
 };
 
