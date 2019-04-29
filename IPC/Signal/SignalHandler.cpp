@@ -1,46 +1,41 @@
 #include "SignalHandler.h"
 
 SignalHandler *SignalHandler::instance = nullptr;
-EventHandler *SignalHandler::signal_handlers[NSIG];
+EventHandler *SignalHandler::signalHandlers[NSIG];
 
 SignalHandler *SignalHandler::getInstance() {
-
     if (instance == nullptr)
         instance = new SignalHandler();
 
     return instance;
 }
 
-void SignalHandler::destruir() {
+void SignalHandler::destroy() {
     if (instance != nullptr) {
         delete (instance);
         instance = nullptr;
     }
 }
 
-EventHandler *SignalHandler::registrarHandler(int signum, EventHandler *eh) {
+EventHandler *SignalHandler::registerHandler(int signum, EventHandler *eventHandler) {
+    EventHandler *oldEventHandler = SignalHandler::signalHandlers[signum];
+    SignalHandler::signalHandlers[signum] = eventHandler;
 
-    EventHandler *old_eh = SignalHandler::signal_handlers[signum];
-    SignalHandler::signal_handlers[signum] = eh;
-
-    struct sigaction sa{};
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = SignalHandler::dispatcher;
-    sigemptyset(&sa.sa_mask);
-    sigaddset(&sa.sa_mask, signum);
-    sigaction(signum, &sa, nullptr);
-
-    return old_eh;
+    struct sigaction saction{};
+    memset(&saction, 0, sizeof(saction));
+    saction.sa_handler = SignalHandler::dispatcher;
+    sigemptyset(&saction.sa_mask);
+    sigaddset(&saction.sa_mask, signum);
+    sigaction(signum, &saction, nullptr);
+    return oldEventHandler;
 }
 
 void SignalHandler::dispatcher(int signum) {
-
-    if (SignalHandler::signal_handlers[signum] != nullptr)
-        SignalHandler::signal_handlers[signum]->handleSignal(signum);
+    if (SignalHandler::signalHandlers[signum] != nullptr)
+        SignalHandler::signalHandlers[signum]->handleSignal(signum);
 }
 
-int SignalHandler::removerHandler(int signum) {
-
-    SignalHandler::signal_handlers[signum] = nullptr;
+int SignalHandler::removeHandler(int signum) {
+    SignalHandler::signalHandlers[signum] = nullptr;
     return 0;
 }

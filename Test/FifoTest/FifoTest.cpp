@@ -9,7 +9,7 @@
 
 using namespace std;
 const int BUFFER_SIZE = 20;
-const char *TEST_MESSAGE = "test message";
+const char *TEST_MESSAGE = "Test message";
 const char *TEST_FIFO_PATH = "/tmp/test_fifo_path";
 const char *TEST_NOT_FIFO_PATH = "/bin/bash";
 
