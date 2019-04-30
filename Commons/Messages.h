@@ -3,6 +3,7 @@
 
 #include <map>
 #include <sstream>
+#include <string.h>
 #define MAXBUFF 50
 
 enum INSTANCE_TYPE {
@@ -148,8 +149,7 @@ struct PortalResponse {
         return response_message.str();
     }
 
-    char* serialize() {
-        char serialized[MAXBUFF];
+    char* serialize(char* serialized) {
         INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
         *enum_serialized = instanceType;
         enum_serialized++;
@@ -171,7 +171,6 @@ struct PortalResponse {
             default:
                 break;
         }
-        return serialized;
     }
 
     void deserialize(const char* serialized) {
@@ -226,8 +225,8 @@ struct MSRequest {
         }
         return representation;
     }
-    char* serialize() {
-        char serialized[MAXBUFF];
+
+    char* serialize(char* serialized) {
         Method* method_serialized = (Method*) serialized;
         *method_serialized = method;
         method_serialized++;
@@ -261,7 +260,6 @@ struct MSRequest {
             default:
                 break;
         }
-        return serialized;
     }
 
     void deserialize(const char* serialized) {
