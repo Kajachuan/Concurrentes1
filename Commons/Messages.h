@@ -4,7 +4,6 @@
 #include <map>
 #include <sstream>
 #include <string.h>
-#define MAXBUFF 50
 
 enum INSTANCE_TYPE {
     WEATHER_MICROSERVICE,
@@ -76,6 +75,11 @@ struct WeatherRecord {
             char_serialized++;
         }
     }
+
+    size_t get_bytes_size() {
+        return sizeof(float) * 3 + strlen(code) * sizeof(char) + strlen(name) + sizeof(char);
+    }
+
 };
 
 struct ExchangeRecord {
@@ -116,6 +120,10 @@ struct ExchangeRecord {
             name[i] = *char_serialized;
             char_serialized++;
         }
+    }
+
+    size_t get_bytes_size() {
+        return sizeof(float) + strlen(code) * sizeof(char) + strlen(name) + sizeof(char);
     }
 };
 
@@ -196,6 +204,25 @@ struct PortalResponse {
                 break;
         }
     }
+
+    size_t get_bytes_size() {
+        size_t common_size = sizeof(INSTANCE_TYPE) + sizeof(bool) * 2;
+        size_t instance_size;
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                instance_size = weatherRecord.get_bytes_size();
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                instance_size = exchangeRecord.get_bytes_size();
+                break;
+            }
+            default:
+                instance_size = 0;
+                break;
+        }
+        return common_size + instance_size;
+    }
 };
 
 struct MSRequest {
@@ -230,7 +257,7 @@ struct MSRequest {
         Method* method_serialized = (Method*) serialized;
         *method_serialized = method;
         method_serialized++;
-        INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) serialized;
+        INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) method_serialized;
         *type_serialized = instanceType;
         type_serialized++;
         bool* bool_serialized = (bool*) type_serialized;
@@ -266,7 +293,7 @@ struct MSRequest {
         Method* method_serialized = (Method*) serialized;
         method = *method_serialized;
         method_serialized++;
-        INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) serialized;
+        INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) method_serialized;
         instanceType = *type_serialized;
         type_serialized++;
         bool* bool_serialized = (bool*) type_serialized;
@@ -297,11 +324,57 @@ struct MSRequest {
                 break;
         }
     }
+
+    size_t get_bytes_size() {
+        size_t common_size = sizeof(Method) + sizeof(INSTANCE_TYPE) + sizeof(char) * strlen(responseFifoPath) +
+                             sizeof(char) * strlen(code) + sizeof(bool);
+        size_t instance_size;
+        switch(instanceType) {
+            case WEATHER_MICROSERVICE: {
+                instance_size = weatherRecord.get_bytes_size();
+                break;
+            }
+            case EXCHANGE_MICROSERVICE: {
+                instance_size = exchangeRecord.get_bytes_size();
+                break;
+            }
+            default:
+                instance_size = 0;
+                break;
+        }
+        return common_size + instance_size;
+    }
 };
 
 struct ConnectionRequest {
     char senderResponseFifoPath[50];
     INSTANCE_TYPE instanceType;
+
+    void serialize(char* serialized) {
+        INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
+        *enum_serialized = instanceType;
+        enum_serialized++;
+        char* char_serialized = (char*) enum_serialized;
+        for (int i = 0; i < strlen(senderResponseFifoPath); i++) {
+            *char_serialized = senderResponseFifoPath[i];
+            char_serialized++;
+        }
+    }
+
+    void deserialize(char* serialized) {
+        INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
+        instanceType = *enum_serialized;
+        enum_serialized++;
+        char* char_serialized = (char*) enum_serialized;
+        for (int i = 0; i < strlen(char_serialized); i++) {
+            senderResponseFifoPath[i] = *char_serialized;
+            char_serialized++;
+        }
+    }
+
+    size_t get_bytes_size() {
+        return sizeof(INSTANCE_TYPE) + sizeof(char) * strlen(senderResponseFifoPath);
+    }
 };
 
 #endif //PRIMER_PROYECTO_MESSAGE_H
