@@ -11,7 +11,10 @@ MicroserviceController::MicroserviceController(std::string registerRequestFifoPa
     registerRequestFifo.open_fifo();
     ConnectionRequest connectionRequest{"", instanceType};
     std::strcpy(connectionRequest.senderResponseFifoPath, requestFifoPathName.c_str());
-    registerRequestFifo.write_fifo(static_cast<void *>(&connectionRequest), sizeof(ConnectionRequest));
+    size_t total_size = connectionRequest.get_bytes_size() + sizeof(int);
+    char serialized_message[total_size];
+    connectionRequest.serialize_with_size(serialized_message, total_size);
+    registerRequestFifo.write_fifo(static_cast<const void *>(serialized_message), total_size);
 
     logger->logMessage(DEBUG, "Opening request microservice fifo with path: " + requestFifoPathName);
     requestFifo = new FifoReader(requestFifoPathName);

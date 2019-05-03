@@ -13,43 +13,66 @@ ClientController::ClientController(const std::string registerRequestFifoPathName
     registerRequestFifo.open_fifo();
     ConnectionRequest connectionRequest{"", CLIENT};
     std::strcpy(connectionRequest.senderResponseFifoPath, responseFifoPathName.c_str());
-    registerRequestFifo.write_fifo(static_cast<void *>(&connectionRequest), sizeof(ConnectionRequest));
+    size_t total_size = connectionRequest.get_bytes_size() + sizeof(int);
+    char serialized_message[total_size];
+    connectionRequest.serialize_with_size(serialized_message, total_size);
+    registerRequestFifo.write_fifo(static_cast<const void *>(serialized_message), total_size);
 
     logger->logMessage(DEBUG, "Connecting to the fifo that read responses from the portal: " + responseFifoPathName);
     responseFifo = new FifoReader(responseFifoPathName);
     responseFifo->open_fifo();
 
-    ssize_t readBytes = responseFifo->read_fifo(static_cast<void *>(&connectionRequest), sizeof(connectionRequest));
-    if (readBytes > 0 and connectionRequest.instanceType == MS_QUERY_CONTROLLER) {
-        logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the portal: " +
-        std::string(connectionRequest.senderResponseFifoPath));
-        requestFifo = new FifoWriter(connectionRequest.senderResponseFifoPath);
-        requestFifo->open_fifo();
-    } else {
-        logger->logMessage(ERROR, "No connection request from portal");
+    int message_size;
+    ssize_t readBytes = responseFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
+    if (readBytes > 0) {
+        char serialized[message_size];
+        readBytes = responseFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
+        if (readBytes > 0) {
+            connectionRequest.deserialize(serialized);
+            if (connectionRequest.instanceType == MS_QUERY_CONTROLLER) {
+                logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the portal: " +
+                                          std::string(connectionRequest.senderResponseFifoPath));
+                requestFifo = new FifoWriter(connectionRequest.senderResponseFifoPath);
+                requestFifo->open_fifo();
+            } else {
+                logger->logMessage(ERROR, "No connection request from portal");
+            }
+        } else {
+            logger->logMessage(ERROR, "No connection request from portal");
+        }
     }
-
 }
 
 ClientController::~ClientController() {
     MSRequest requestMessage{};
     requestMessage.closeConnection = true;
-    requestFifo->write_fifo(static_cast<const void *>(&requestMessage), sizeof(requestMessage));
+    size_t total_size = requestMessage.get_bytes_size() + sizeof(int);
+    char serialized_message[total_size];
+    requestMessage.serialize_with_size(serialized_message, total_size);
+    requestFifo->write_fifo(static_cast<const void *>(serialized_message), total_size);
     delete responseFifo;
     delete requestFifo;
 }
 
 std::string ClientController::portal_request(MSRequest requestMessage) {
     logger->logMessage(INFO, "Sending client request to portal: " + requestMessage.asString());
-    requestFifo->write_fifo(static_cast<const void *>(&requestMessage), sizeof(requestMessage));
+    size_t total_size = requestMessage.get_bytes_size() + sizeof(int);
+    char serialized_message[total_size];
+    requestMessage.serialize_with_size(serialized_message, total_size);
+    requestFifo->write_fifo(static_cast<const void *>(serialized_message), total_size);
 
     PortalResponse portalResponse{};
-    ssize_t readedBytes = responseFifo->read_fifo(static_cast<void *>(&portalResponse),
-            sizeof(PortalResponse));
-    if (readedBytes > 0) {
-        logger->logMessage(INFO, "Received response from the portal: " + portalResponse.asString());
-    } else {
-        logger->logMessage(ERROR, "No response from portal");
+    int message_size;
+    ssize_t readBytes = responseFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
+    if (readBytes > 0) {
+        char serialized[message_size];
+        readBytes = responseFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
+        if (readBytes > 0) {
+            portalResponse.deserialize(serialized);
+            logger->logMessage(INFO, "Received response from the portal: " + portalResponse.asString());
+        } else {
+            logger->logMessage(ERROR, "No response from portal");
+        }
     }
     return portalResponse.asString();
 }

@@ -35,7 +35,10 @@ void PortalController::endPortal(){
         std::map<std::string, FifoWriter *>::iterator instanceIterator;
         for (instanceIterator = serviceIterator->second.begin(); instanceIterator != serviceIterator->second.end();
              instanceIterator++) {
-            instanceIterator->second->write_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
+            size_t total_size = requestMessage.get_bytes_size() + sizeof(int);
+            char serialized_message[total_size];
+            requestMessage.serialize_with_size(serialized_message, total_size);
+            instanceIterator->second->write_fifo(static_cast<const void *>(serialized_message), total_size);
             delete instanceIterator->second;
         }
     }
@@ -43,41 +46,47 @@ void PortalController::endPortal(){
 
 int PortalController::processConnectionRequests() {
     ConnectionRequest requestMessage{};
-    ssize_t readBytes = connectionRequestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(requestMessage));
+    int message_size;
+    ssize_t readBytes = connectionRequestFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
     if (readBytes > 0) {
-        switch(requestMessage.instanceType) {
-            case CLIENT: {
-                logger->logMessage(DEBUG, "MSQueryController request, forking...");
-                pid_t pid = fork();
-                if (pid == 0) {
-                    std::string clientRequestFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
-                    std::string servicesResponseFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
-                    MSQueryController msQueryController(clientRequestFifoPath, requestMessage.senderResponseFifoPath,
-                                                        servicesResponseFifoPath, getRequestServicesMap());
-                    while (!msQueryController.process_requests()) {};
-                } else {
-                    forkedChilds++;
+        char serialized[message_size];
+        readBytes = connectionRequestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
+        if (readBytes > 0) {
+            requestMessage.deserialize(serialized);
+            switch(requestMessage.instanceType) {
+                case CLIENT: {
+                    logger->logMessage(DEBUG, "MSQueryController request, forking...");
+                    pid_t pid = fork();
+                    if (pid == 0) {
+                        std::string clientRequestFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
+                        std::string servicesResponseFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
+                        MSQueryController msQueryController(clientRequestFifoPath, requestMessage.senderResponseFifoPath,
+                                                            servicesResponseFifoPath, getRequestServicesMap());
+                        while (!msQueryController.process_requests()) {};
+                    } else {
+                        forkedChilds++;
+                    }
+                    return pid;
                 }
-                return pid;
-            }
-            case EXCHANGE_MICROSERVICE:
-            case WEATHER_MICROSERVICE: {
-                logger->logMessage(DEBUG, "Service: " + std::string(serviceNames[requestMessage.instanceType]) +
-                " registration request in fifo path: " + std::string(requestMessage.senderResponseFifoPath));
-                if (servicesRequestFifos[requestMessage.instanceType].count(
-                        requestMessage.senderResponseFifoPath) == 0) {
-                    logger->logMessage(DEBUG, "Creating new service request fifo: " +
-                    std::string(requestMessage.senderResponseFifoPath));
-                    FifoWriter *servFifo = new FifoWriter(requestMessage.senderResponseFifoPath);
-                    servFifo->open_fifo();
-                    servicesRequestFifos[requestMessage.instanceType][requestMessage.senderResponseFifoPath] = servFifo;
+                case EXCHANGE_MICROSERVICE:
+                case WEATHER_MICROSERVICE: {
+                    logger->logMessage(DEBUG, "Service: " + std::string(serviceNames[requestMessage.instanceType]) +
+                                              " registration request in fifo path: " + std::string(requestMessage.senderResponseFifoPath));
+                    if (servicesRequestFifos[requestMessage.instanceType].count(
+                            requestMessage.senderResponseFifoPath) == 0) {
+                        logger->logMessage(DEBUG, "Creating new service request fifo: " +
+                                                  std::string(requestMessage.senderResponseFifoPath));
+                        FifoWriter *servFifo = new FifoWriter(requestMessage.senderResponseFifoPath);
+                        servFifo->open_fifo();
+                        servicesRequestFifos[requestMessage.instanceType][requestMessage.senderResponseFifoPath] = servFifo;
+                    }
+                    break;
                 }
-                break;
-            }
-            default: {
-                logger->logMessage(DEBUG, "Wrong message, instanceType: " +
-                std::string(serviceNames[requestMessage.instanceType]));
-                break;
+                default: {
+                    logger->logMessage(DEBUG, "Wrong message, instanceType: " +
+                                              std::string(serviceNames[requestMessage.instanceType]));
+                    break;
+                }
             }
         }
     }

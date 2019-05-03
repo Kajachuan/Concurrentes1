@@ -223,6 +223,14 @@ struct PortalResponse {
         }
         return common_size + instance_size;
     }
+
+    void serialize_with_size(char* serialized, size_t size) {
+        int* int_serialized = (int*) serialized;
+        *int_serialized = static_cast<int>(size - sizeof(int));
+        int_serialized++;
+        char* request_serialized = (char*) int_serialized;
+        serialize(request_serialized);
+    }
 };
 
 struct MSRequest {
@@ -344,6 +352,14 @@ struct MSRequest {
         }
         return common_size + instance_size;
     }
+
+    void serialize_with_size(char* serialized, size_t size) {
+        int* int_serialized = (int*) serialized;
+        *int_serialized = static_cast<int>(size - sizeof(int));
+        int_serialized++;
+        char* request_serialized = (char*) int_serialized;
+        serialize(request_serialized);
+    }
 };
 
 struct ConnectionRequest {
@@ -375,6 +391,15 @@ struct ConnectionRequest {
     size_t get_bytes_size() {
         return sizeof(INSTANCE_TYPE) + sizeof(char) * strlen(senderResponseFifoPath);
     }
+
+    void serialize_with_size(char* serialized, size_t size) {
+        int* int_serialized = (int*) serialized;
+        *int_serialized = static_cast<int>(size - sizeof(int));
+        int_serialized++;
+        char* request_serialized = (char*) int_serialized;
+        serialize(request_serialized);
+    }
 };
+
 
 #endif //PRIMER_PROYECTO_MESSAGE_H
