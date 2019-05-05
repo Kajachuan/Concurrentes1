@@ -57,27 +57,31 @@ struct WeatherRecord {
         }
     }
 
-    void deserialize(const char* serialized) {
+    void deserialize(const char* serialized, int total_size) {
         float* floated_serialized = (float*) serialized;
         temperature = *floated_serialized;
         floated_serialized++;
+        total_size -= sizeof(float);
         pressure = *floated_serialized;
         floated_serialized++;
+        total_size -= sizeof(float);
         humidity = *floated_serialized;
         floated_serialized++;
+        total_size -= sizeof(float);
         char* char_serialized = (char*) floated_serialized;
         for (int i = 0; i < 3; i++) {
             code[i] = *char_serialized;
             char_serialized++;
         }
-        for (int i = 0; i < strlen(char_serialized); i++) {
+        total_size -= sizeof(char) * 3;
+        for (int i = 0; i < total_size; i++) {
             name[i] = *char_serialized;
             char_serialized++;
         }
     }
 
     size_t get_bytes_size() {
-        return sizeof(float) * 3 + strlen(code) * sizeof(char) + strlen(name) + sizeof(char);
+        return sizeof(float) * 3 + strlen(code) * sizeof(char) + strlen(name) * sizeof(char);
     }
 
 };
@@ -107,23 +111,25 @@ struct ExchangeRecord {
         }
     }
 
-    void deserialize(const char* serialized) {
+    void deserialize(const char* serialized, int total_size) {
         float* floated_serialized = (float*) serialized;
         exchange = *floated_serialized;
         floated_serialized++;
+        total_size -= sizeof(float);
         char* char_serialized = (char*) floated_serialized;
         for (int i = 0; i < 3; i++) {
             code[i] = *char_serialized;
             char_serialized++;
         }
-        for (int i = 0; i < strlen(char_serialized); i++) {
+        total_size -= sizeof(char) * 3;
+        for (int i = 0; i < total_size; i++) {
             name[i] = *char_serialized;
             char_serialized++;
         }
     }
 
     size_t get_bytes_size() {
-        return sizeof(float) + strlen(code) * sizeof(char) + strlen(name) + sizeof(char);
+        return sizeof(float) + strlen(code) * sizeof(char) + strlen(name) * sizeof(char);
     }
 };
 
@@ -181,23 +187,26 @@ struct PortalResponse {
         }
     }
 
-    void deserialize(const char* serialized) {
+    void deserialize(const char* serialized, int total_size) {
         INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
         instanceType = *enum_serialized;
         enum_serialized++;
+        total_size -= sizeof(INSTANCE_TYPE);
         bool* bool_serialized = (bool*) enum_serialized;
         found = *bool_serialized;
         bool_serialized++;
-        *bool_serialized = requestError;
+        total_size -= sizeof(bool);
+        requestError = *bool_serialized;
         bool_serialized++;
+        total_size -= sizeof(bool);
         char* char_serialized = (char*) bool_serialized;
         switch(instanceType) {
             case WEATHER_MICROSERVICE: {
-                weatherRecord.deserialize(char_serialized);
+                weatherRecord.deserialize(char_serialized, total_size);
                 break;
             }
             case EXCHANGE_MICROSERVICE: {
-                exchangeRecord.deserialize(char_serialized);
+                exchangeRecord.deserialize(char_serialized, total_size);
                 break;
             }
             default:
@@ -297,35 +306,41 @@ struct MSRequest {
         }
     }
 
-    void deserialize(const char* serialized) {
+    void deserialize(const char* serialized, int total_size) {
         Method* method_serialized = (Method*) serialized;
         method = *method_serialized;
         method_serialized++;
+        total_size -= sizeof(Method);
         INSTANCE_TYPE* type_serialized = (INSTANCE_TYPE*) method_serialized;
         instanceType = *type_serialized;
         type_serialized++;
+        total_size -= sizeof(INSTANCE_TYPE);
         bool* bool_serialized = (bool*) type_serialized;
         closeConnection = *bool_serialized;
         bool_serialized++;
+        total_size -= sizeof(bool);
         int* int_serialized = (int*) bool_serialized;
         int responseFifoPathLength = *int_serialized;
         int_serialized++;
+        total_size -= sizeof(int);
         char* char_serialized = (char*) int_serialized;
         for (int i = 0; i < responseFifoPathLength; i++) {
             responseFifoPath[i] = *char_serialized;
             char_serialized++;
         }
+        total_size -= responseFifoPathLength * sizeof(char);
         for (int i = 0; i < 3; i++) {
             code[i] = *char_serialized;
             char_serialized++;
         }
+        total_size -= 3 * sizeof(char);
         switch(instanceType) {
             case WEATHER_MICROSERVICE: {
-                weatherRecord.deserialize(char_serialized);
+                weatherRecord.deserialize(char_serialized, total_size);
                 break;
             }
             case EXCHANGE_MICROSERVICE: {
-                exchangeRecord.deserialize(char_serialized);
+                exchangeRecord.deserialize(char_serialized, total_size);
                 break;
             }
             default:
@@ -377,12 +392,13 @@ struct ConnectionRequest {
         }
     }
 
-    void deserialize(char* serialized) {
+    void deserialize(char* serialized, int total_size) {
         INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
         instanceType = *enum_serialized;
         enum_serialized++;
+        total_size -= sizeof(INSTANCE_TYPE);
         char* char_serialized = (char*) enum_serialized;
-        for (int i = 0; i < strlen(char_serialized); i++) {
+        for (int i = 0; i < total_size; i++) {
             senderResponseFifoPath[i] = *char_serialized;
             char_serialized++;
         }

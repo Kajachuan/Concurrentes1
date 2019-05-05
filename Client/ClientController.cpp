@@ -28,7 +28,7 @@ ClientController::ClientController(const std::string registerRequestFifoPathName
         char serialized[message_size];
         readBytes = responseFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
-            connectionRequest.deserialize(serialized);
+            connectionRequest.deserialize(serialized, message_size);
             if (connectionRequest.instanceType == MS_QUERY_CONTROLLER) {
                 logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the portal: " +
                                           std::string(connectionRequest.senderResponseFifoPath));
@@ -68,7 +68,7 @@ std::string ClientController::portal_request(MSRequest requestMessage) {
         char serialized[message_size];
         readBytes = responseFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
-            portalResponse.deserialize(serialized);
+            portalResponse.deserialize(serialized, message_size);
             logger->logMessage(INFO, "Received response from the portal: " + portalResponse.asString());
         } else {
             logger->logMessage(ERROR, "No response from portal");

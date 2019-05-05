@@ -61,7 +61,7 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
         char serialized[message_size];
         readBytes = requestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
-            portalResponse.deserialize(serialized);
+            portalResponse.deserialize(serialized, message_size);
             logger->logMessage(DEBUG, "Received request: " + requestMessage.asString());
             if (responseFifos.count(requestMessage.responseFifoPath) == 0) {
                 logger->logMessage(DEBUG, "Creating new response fifo: " + std::string(requestMessage.responseFifoPath));
@@ -88,7 +88,7 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
                     response_message.found = true;
                     dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
                 }
-                size_t total_size = requestMessage.get_bytes_size() + sizeof(int);
+                size_t total_size = response_message.get_bytes_size() + sizeof(int);
                 char serialized_message[total_size];
                 requestMessage.serialize_with_size(serialized_message, total_size);
                 responseFifos[requestMessage.responseFifoPath]->write_fifo(static_cast<const void *>(serialized_message), total_size);

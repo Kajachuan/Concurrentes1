@@ -52,7 +52,7 @@ int PortalController::processConnectionRequests() {
         char serialized[message_size];
         readBytes = connectionRequestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
-            requestMessage.deserialize(serialized);
+            requestMessage.deserialize(serialized, message_size);
             switch(requestMessage.instanceType) {
                 case CLIENT: {
                     logger->logMessage(DEBUG, "MSQueryController request, forking...");

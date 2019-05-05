@@ -43,7 +43,7 @@ bool MSQueryController::process_requests() {
         char serialized[message_size];
         readBytes = clientRequestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
-            requestMessage.deserialize(serialized);
+            requestMessage.deserialize(serialized, message_size);
             if (!requestMessage.closeConnection) {
                 logger->logMessage(DEBUG, "Read request message: " + requestMessage.asString());
                 PortalResponse msResponse = getMSResponse(requestMessage);
@@ -87,7 +87,7 @@ PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
             readBytes = servicesResponseFifo->read_fifo(static_cast<void *>(serialized),
                                                         static_cast<size_t>(message_size));
             if (readBytes > 0) {
-                requestMessage.deserialize(serialized);
+                requestMessage.deserialize(serialized, message_size);
                 logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
             }
         }
