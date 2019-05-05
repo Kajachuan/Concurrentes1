@@ -2,7 +2,7 @@
 #include <cstring>
 #include <wait.h>
 #include "PortalController.h"
-#include "../logger/Logger.h"
+#include "../Logger/Logger.h"
 #include "MSQueryController.h"
 
 Logger *PortalController::logger = Logger::getInstance("PortalController");
@@ -66,7 +66,6 @@ int PortalController::processConnectionRequests() {
                     } else {
                         forkedChilds++;
                     }
-                    return pid;
                 }
                 case EXCHANGE_MICROSERVICE:
                 case WEATHER_MICROSERVICE: {

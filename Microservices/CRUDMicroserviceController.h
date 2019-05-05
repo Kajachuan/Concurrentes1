@@ -5,10 +5,9 @@
 #include <list>
 #include <map>
 #include <typeinfo>
-#include "../logger/Logger.h"
+#include "../Logger/Logger.h"
 #include "MicroserviceController.h"
 #include "CRUDMicroserviceController.h"
-#include "../logger/Logger.h"
 #include "../Commons/Messages.h"
 #include "../Commons/DataRecordManager.h"
 
