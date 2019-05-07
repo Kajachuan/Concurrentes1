@@ -87,7 +87,7 @@ PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
             readBytes = servicesResponseFifo->read_fifo(static_cast<void *>(serialized),
                                                         static_cast<size_t>(message_size));
             if (readBytes > 0) {
-                requestMessage.deserialize(serialized, message_size);
+	            responseMessage.deserialize(serialized, message_size);
                 logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
             }
         }

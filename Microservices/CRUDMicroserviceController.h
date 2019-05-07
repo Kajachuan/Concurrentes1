@@ -53,14 +53,13 @@ template <class DataRecord>
 bool CRUDMicroserviceController<DataRecord>::processRequest() {
     logger->logMessage(DEBUG, "Reading request fifo");
     MSRequest requestMessage{};
-    PortalResponse portalResponse{};
     int message_size;
     ssize_t readBytes = requestFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
     if (readBytes > 0) {
         char serialized[message_size];
         readBytes = requestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
-            portalResponse.deserialize(serialized, message_size);
+	        requestMessage.deserialize(serialized, message_size);
             logger->logMessage(DEBUG, "Received request: " + requestMessage.asString());
             if (responseFifos.count(requestMessage.responseFifoPath) == 0) {
                 logger->logMessage(DEBUG, "Creating new response fifo: " + std::string(requestMessage.responseFifoPath));
