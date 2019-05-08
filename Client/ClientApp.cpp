@@ -4,8 +4,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    auto logger = Logger::getInstance("client main");
-    Logger::setLogLevel(DEBUG);
+    auto logger = LoggerClient("client main");
     ClientController client("/tmp/register-portal", "/tmp/portal-client");
     std::string command;
 
@@ -13,11 +12,11 @@ int main(int argc, char *argv[]) {
         std::cout << "Insert your command here (type 'help' for information) or 'end' to finish: ";
         std::cin >> command;
         while (command.size() != 5 && command != "end" && command != "help") {
-            logger->logMessage(ERROR, "Command must be 5 chars long: " + command);
+            logger.logMessage(ERROR, "Command must be 5 chars long: " + command);
             std::cout << "Command must be 5 chars long. Insert your new command: ";
             std::cin >> command;
         }
-        logger->logMessage(DEBUG, "Recieved command: " + command);
+        logger.logMessage(DEBUG, "Recieved command: " + command);
         if (command == "help") {
             std::cout << "The command is composed of five joined characters:" << std::endl;
             std::cout << "\t- The first character can be 'w' (Weather) or 'c' (Exchange)." << std::endl;
@@ -104,10 +103,9 @@ int main(int argc, char *argv[]) {
             }
 
             catch (...) {
-                logger->logMessage(ERROR, "Unknown command: " + command);
+                logger.logMessage(ERROR, "Unknown command: " + command);
                 std::cout << "Unknown command." << std::endl;
             }
         }
     }
-    Logger::endLogger();
 }

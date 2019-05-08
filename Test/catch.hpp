@@ -8186,7 +8186,7 @@ if( colourMode == UseColour::Auto )
 colourMode = UseColour::Yes;
 return colourMode == UseColour::Yes
 ? &s_instance
-: NoColourImpl::instance();
+: NoColourImpl::logWriter();
 }
 
 } // end anon namespace
@@ -8272,7 +8272,7 @@ return colourMode == UseColour::Yes
 
 namespace Catch {
 
-static IColourImpl* platformColourInstance() { return NoColourImpl::instance(); }
+static IColourImpl* platformColourInstance() { return NoColourImpl::logWriter(); }
 
 } // end namespace Catch
 
@@ -10723,7 +10723,7 @@ IResultCapture& getResultCapture() {
 if (auto* capture = getCurrentContext().getResultCapture())
 return *capture;
 else
-CATCH_INTERNAL_ERROR("No result capture instance");
+CATCH_INTERNAL_ERROR("No result capture logWriter");
 }
 }
 // end catch_run_context.cpp
@@ -10950,7 +10950,7 @@ setTags(testCase, tags);
 Session::Session() {
 static bool alreadyInstantiated = false;
 if( alreadyInstantiated ) {
-CATCH_TRY { CATCH_INTERNAL_ERROR( "Only one instance of Catch::Session can ever be used" ); }
+CATCH_TRY { CATCH_INTERNAL_ERROR( "Only one logWriter of Catch::Session can ever be used" ); }
 CATCH_CATCH_ALL { getMutableRegistryHub().registerStartupException(); }
 }
 
