@@ -13,7 +13,6 @@ int main(int argc, char const *argv[]) {
     SignalHandler::getInstance()->registerHandler(SIGINT, &sigintShutdownHandler);
     int processResult = 1;
     while (processResult and sigintShutdownHandler.getGracefulQuit() != 1) {
-        std::cout << getpid()<< std::endl;
         processResult = portal.processConnectionRequests();
     }
     if (processResult < 0 and sigintShutdownHandler.getGracefulQuit() == 1) {
