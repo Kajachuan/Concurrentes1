@@ -83,7 +83,7 @@ int main(int argc, char const *argv[]) {
         records.close();
 
         logger->logMessage(DEBUG, "Start processing requests");
-        while (!msController->processRequest()) {   }
+        while (!msController->processRequest()) {}
 
         logger->logMessage(DEBUG, "Saving DB");
         std::ofstream new_records("exchange.csv");
