@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
                             }
                             std::cout << "Insert name: ";
                             std::cin >> name;
-                            std::strcpy(message.exchangeRecord.name, name.c_str());
+                            std::strcpy(message.weatherRecord.name, name.c_str());
                         } else {
                             std::string exchange, name;
                             while (true) {
