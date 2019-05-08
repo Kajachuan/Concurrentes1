@@ -45,14 +45,13 @@ int main(int argc, char const *argv[]) {
         logger->logMessage(DEBUG, "Start processing requests");
         while (!msController->processRequest()) { }
 
-        logger->logMessage(DEBUG, "Finished saving DB");
         logger->logMessage(DEBUG, "Saving DB");
-        std::ofstream new_records("wheather.csv");
+        std::ofstream new_records("../weather.csv");
         std::list<WeatherRecord> data_to_save = msController->getRecords();
         for (auto record : data_to_save) {
             new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record
                     .temperature << LINES_SEPARATOR << record.pressure << LINES_SEPARATOR << record
-                                .humidity;
+                                .humidity << std::endl;
             logger->logMessage(DEBUG, "Saved " + record.asString());
         }
         new_records.close();
@@ -86,10 +85,10 @@ int main(int argc, char const *argv[]) {
         while (!msController->processRequest()) {}
 
         logger->logMessage(DEBUG, "Saving DB");
-        std::ofstream new_records("exchange.csv");
+        std::ofstream new_records("../exchange.csv");
         std::list<ExchangeRecord> data_to_save = msController->getRecords();
         for (auto record : data_to_save) {
-            new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record.exchange;
+            new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record.exchange << std::endl;
             logger->logMessage(DEBUG, "Saved " + record.asString());
         }
         new_records.close();
