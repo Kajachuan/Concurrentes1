@@ -3,9 +3,9 @@
 #include <iostream>
 #include <cstring>
 #include "MSQueryController.h"
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 
-Logger *MSQueryController::logger = Logger::getInstance("MSQueryController");
+LoggerClient MSQueryController::logger = LoggerClient("MSQueryController");
 
 MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::string clientResponseFifoPath,
         std::string servicesResponseFifoPath, std::map<INSTANCE_TYPE, FifoWriter*> servicesRequestFifos) {
@@ -13,7 +13,7 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
     this->servicesResponseFifoPath = std::move(servicesResponseFifoPath);
     this->servicesResponseFifo = nullptr;
 
-    logger->logMessage(DEBUG, "Connecting to the fifo that writes messages to the client in path: "
+    logger.logMessage(DEBUG, "Connecting to the fifo that writes messages to the client in path: "
     + clientResponseFifoPath);
     clientResponseFifo = new FifoWriter(clientResponseFifoPath);
     clientResponseFifo->open_fifo();
@@ -21,7 +21,7 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
     std::strcpy(connectionRequest.senderResponseFifoPath, clientRequestFifoPath.c_str());
     clientResponseFifo->write_fifo(static_cast<void *>(&connectionRequest), sizeof(ConnectionRequest));
 
-    logger->logMessage(DEBUG, "Waiting for the client to connect " + clientRequestFifoPath);
+    logger.logMessage(DEBUG, "Waiting for the client to connect " + clientRequestFifoPath);
     clientRequestFifo = new FifoReader(clientRequestFifoPath);
     clientRequestFifo->open_fifo();
 }
@@ -36,9 +36,9 @@ bool MSQueryController::process_requests() {
     MSRequest requestMessage{};
     ssize_t readBytes = clientRequestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
     if (readBytes > 0 and !requestMessage.closeConnection) {
-        logger->logMessage(DEBUG, "Read request message: " + requestMessage.asString());
+        logger.logMessage(DEBUG, "Read request message: " + requestMessage.asString());
         PortalResponse msResponse = getMSResponse(requestMessage);
-        logger->logMessage(DEBUG, "Writing response to client: " + msResponse.asString());
+        logger.logMessage(DEBUG, "Writing response to client: " + msResponse.asString());
         clientResponseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
     }
     return requestMessage.closeConnection;
@@ -47,26 +47,26 @@ bool MSQueryController::process_requests() {
 PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
     PortalResponse responseMessage{};
     if (servicesRequestFifos.count(requestMessage.instanceType) == 0) {
-        logger->logMessage(WARNING, "No instance for this service");
+        logger.logMessage(WARNING, "No logWriter for this service");
         responseMessage.requestError = true;
     } else {
         strcpy(requestMessage.responseFifoPath, servicesResponseFifoPath.c_str());
         requestMessage.closeConnection = false;
-        logger->logMessage(DEBUG, "Sending request to microservice: " + requestMessage.asString());
+        logger.logMessage(DEBUG, "Sending request to microservice: " + requestMessage.asString());
         servicesRequestFifos[requestMessage.instanceType]->write_fifo(static_cast<void *>(&requestMessage),
                                                                       sizeof(MSRequest));
 
         if (servicesResponseFifo == nullptr) {
-            logger->logMessage(DEBUG, "Opening response fifo for ms with path: " + servicesResponseFifoPath);
+            logger.logMessage(DEBUG, "Opening response fifo for ms with path: " + servicesResponseFifoPath);
             servicesResponseFifo = new FifoReader(servicesResponseFifoPath);
             servicesResponseFifo->open_fifo();
         }
 
-        logger->logMessage(DEBUG, "Reading response fifo from ms");
+        logger.logMessage(DEBUG, "Reading response fifo from ms");
         ssize_t readedBytes = servicesResponseFifo->read_fifo(static_cast<void *>(&responseMessage),
                                                               sizeof(PortalResponse));
         if (readedBytes > 0) {
-            logger->logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
+            logger.logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
         }
     }
     return responseMessage;

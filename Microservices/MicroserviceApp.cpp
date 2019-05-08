@@ -1,6 +1,6 @@
 #include <cstring>
 #include <fstream>
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 #include "MicroserviceController.h"
 #include "../Commons/DataRecordManager.h"
 #include "CRUDMicroserviceController.h"
@@ -9,9 +9,7 @@ char LINES_SEPARATOR = ',';
 
 
 int main(int argc, char const *argv[]) {
-    auto logger = Logger::getInstance("ms main");
-    Logger::setLogLevel(DEBUG);
-
+    auto logger = LoggerClient("ms main");
     pid_t pid = fork();
     if (pid == 0) {
         CRUDMicroserviceController<WeatherRecord> *msController;
@@ -22,7 +20,7 @@ int main(int argc, char const *argv[]) {
 
 
         std::ifstream records("../weather.csv");
-        if (records.fail()) logger->logMessage(WARNING, "An error occurred while load DB");
+        if (records.fail()) logger.logMessage(WARNING, "An error occurred while load DB");
         std::string line;
         while (getline(records, line)) {
             std::stringstream sline(line);
@@ -38,24 +36,24 @@ int main(int argc, char const *argv[]) {
                 i++;
             }
             msController->addRecord(wrec.code, wrec);
-            logger->logMessage(DEBUG, "Load initial DB" + wrec.asString());
+            logger.logMessage(DEBUG, "Load initial DB" + wrec.asString());
         }
         records.close();
 
-        logger->logMessage(DEBUG, "Start processing requests");
+        logger.logMessage(DEBUG, "Start processing requests");
         while (!msController->processRequest()) { }
 
-        logger->logMessage(DEBUG, "Saving DB");
+        logger.logMessage(DEBUG, "Saving DB");
         std::ofstream new_records("../weather.csv");
         std::list<WeatherRecord> data_to_save = msController->getRecords();
         for (auto record : data_to_save) {
             new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record
                     .temperature << LINES_SEPARATOR << record.pressure << LINES_SEPARATOR << record
                                 .humidity << std::endl;
-            logger->logMessage(DEBUG, "Saved " + record.asString());
+            logger.logMessage(DEBUG, "Saved " + record.asString());
         }
         new_records.close();
-        logger->logMessage(DEBUG, "Finished saving DB");
+        logger.logMessage(DEBUG, "Finished saving DB");
     } else {
         CRUDMicroserviceController<ExchangeRecord> *msController;
         DataRecordManager<ExchangeRecord> *recordManager = new ExchangeRecordManager();
@@ -63,7 +61,7 @@ int main(int argc, char const *argv[]) {
                                                                       "/tmp/query-mse", EXCHANGE_MICROSERVICE,
                                                                       recordManager);
         std::ifstream records("../exchange.csv");
-        if (records.fail()) logger->logMessage(WARNING, "An error occurred while load DB");
+        if (records.fail()) logger.logMessage(WARNING, "An error occurred while load DB");
         std::string line;
         while (getline(records, line)) {
             std::stringstream sline(line);
@@ -77,24 +75,21 @@ int main(int argc, char const *argv[]) {
                 i++;
             }
             msController->addRecord(wrec.code, wrec);
-            logger->logMessage(DEBUG, "Load initial DB" + wrec.asString());
+            logger.logMessage(DEBUG, "Load initial DB" + wrec.asString());
         }
         records.close();
 
-        logger->logMessage(DEBUG, "Start processing requests");
+        logger.logMessage(DEBUG, "Start processing requests");
         while (!msController->processRequest()) {}
 
-        logger->logMessage(DEBUG, "Saving DB");
+        logger.logMessage(DEBUG, "Saving DB");
         std::ofstream new_records("../exchange.csv");
         std::list<ExchangeRecord> data_to_save = msController->getRecords();
         for (auto record : data_to_save) {
             new_records << record.code << LINES_SEPARATOR << record.name << LINES_SEPARATOR << record.exchange << std::endl;
-            logger->logMessage(DEBUG, "Saved " + record.asString());
+            logger.logMessage(DEBUG, "Saved " + record.asString());
         }
         new_records.close();
-        logger->logMessage(DEBUG, "Finished saving DB");
+        logger.logMessage(DEBUG, "Finished saving DB");
     }
-
-
-    Logger::endLogger();
 }

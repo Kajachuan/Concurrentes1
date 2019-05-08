@@ -7,7 +7,7 @@
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../Commons/Messages.h"
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 
 class PortalController {
 public:
@@ -22,7 +22,7 @@ public:
     std::map<INSTANCE_TYPE, FifoWriter*> getRequestServicesMap();
 
 private:
-    static Logger *logger;
+    static LoggerClient logger;
     FifoReader *connectionRequestFifo;
     std::map<INSTANCE_TYPE, std::map<std::string, FifoWriter *>> servicesRequestFifos;
     int forkedChilds;

@@ -2,13 +2,13 @@
 #include <cstring>
 #include <wait.h>
 #include "PortalController.h"
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 #include "MSQueryController.h"
 
-Logger *PortalController::logger = Logger::getInstance("PortalController");
+LoggerClient PortalController::logger = LoggerClient("PortalController");
 
 PortalController::PortalController(std::string connectionRequestFifoPath) {
-    logger->logMessage(DEBUG, "Waiting to first register in fifo path: " + connectionRequestFifoPath);
+    logger.logMessage(DEBUG, "Waiting to first register in fifo path: " + connectionRequestFifoPath);
     connectionRequestFifo = new FifoReader(connectionRequestFifoPath);
     connectionRequestFifo->open_fifo();
     forkedChilds = 0;
@@ -19,14 +19,14 @@ PortalController::~PortalController(){
 }
 
 void PortalController::endPortal(){
-    logger->logMessage(DEBUG, "Waiting child processes and clients to end connections");
+    logger.logMessage(DEBUG, "Waiting child processes and clients to end connections");
     int status;
     for (int i = 0; i < forkedChilds; ++i) {
         wait(&status);
     }
     connectionRequestFifo->deleteFifo();
 
-    logger->logMessage(DEBUG, "Sending close connection to services");
+    logger.logMessage(DEBUG, "Sending close connection to services");
     MSRequest requestMessage{};
     requestMessage.closeConnection = true;
     std::map<INSTANCE_TYPE, std::map<std::string, FifoWriter *>>::iterator serviceIterator;
@@ -47,7 +47,7 @@ int PortalController::processConnectionRequests() {
     if (readBytes > 0) {
         switch(requestMessage.instanceType) {
             case CLIENT: {
-                logger->logMessage(DEBUG, "MSQueryController request, forking...");
+                logger.logMessage(DEBUG, "MSQueryController request, forking...");
                 pid_t pid = fork();
                 if (pid == 0) {
                     std::string clientRequestFifoPath = "/tmp/client-query" + std::to_string(forkedChilds);
@@ -62,11 +62,11 @@ int PortalController::processConnectionRequests() {
             }
             case EXCHANGE_MICROSERVICE:
             case WEATHER_MICROSERVICE: {
-                logger->logMessage(DEBUG, "Service: " + std::string(serviceNames[requestMessage.instanceType]) +
+                logger.logMessage(DEBUG, "Service: " + std::string(serviceNames[requestMessage.instanceType]) +
                 " registration request in fifo path: " + std::string(requestMessage.senderResponseFifoPath));
                 if (servicesRequestFifos[requestMessage.instanceType].count(
                         requestMessage.senderResponseFifoPath) == 0) {
-                    logger->logMessage(DEBUG, "Creating new service request fifo: " +
+                    logger.logMessage(DEBUG, "Creating new service request fifo: " +
                     std::string(requestMessage.senderResponseFifoPath));
                     FifoWriter *servFifo = new FifoWriter(requestMessage.senderResponseFifoPath);
                     servFifo->open_fifo();
@@ -75,7 +75,7 @@ int PortalController::processConnectionRequests() {
                 break;
             }
             default: {
-                logger->logMessage(DEBUG, "Wrong message, instanceType: " +
+                logger.logMessage(DEBUG, "Wrong message, instanceType: " +
                 std::string(serviceNames[requestMessage.instanceType]));
                 break;
             }

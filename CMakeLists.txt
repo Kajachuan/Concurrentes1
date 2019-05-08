@@ -4,7 +4,7 @@ project(primer-proyecto)
 set(CMAKE_CXX_STANDARD 11)
 
 # Log
-set(LOGGER Logger/Logger.cpp Logger/Logger.h)
+set(LOGGER Logger/LoggerClient.cpp Logger/LoggerClient.h Logger/LoggerServer.cpp Logger/LoggerServer.h)
 
 # Exceptions
 set(MKNOD_EXCEPTION Exceptions/MKNODException.cpp Exceptions/MKNODException.h)
@@ -39,5 +39,8 @@ add_executable(client ${CLIENT_SOURCES} ${FIFO} ${LOGGER} ${COMMONS})
 set(TEST_CATCH Test/catch.hpp)
 set(FIFO_TEST Test/FifoTest/FifoTest.cpp ${TEST_CATCH} ${FIFO})
 add_executable(tests ${FIFO_TEST})
+
+# Logger Server
+add_executable(logger_server ${LOGGER} Logger/LoggerServerApp.cpp  ${FIFO}  ${SIGNAL})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/logs)

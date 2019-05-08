@@ -1,7 +1,7 @@
 #ifndef PRIMER_PROYECTO_MICROSERVICECONTROLLER_H
 #define PRIMER_PROYECTO_MICROSERVICECONTROLLER_H
 
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../IPC/Fifo/FifoReader.h"
 #include "../Commons/Messages.h"
@@ -20,7 +20,7 @@ protected:
     FifoReader *requestFifo;
     std::map<std::string, FifoWriter *> responseFifos;
 private:
-    static Logger *logger;
+    static LoggerClient logger;
 };
 
 

@@ -22,9 +22,12 @@ Fifo::Fifo(const std::string path_name) : path_name(path_name), fd(-1) {
 }
 
 Fifo::~Fifo() {
-    close(fd);
+    if (fd > 0)
+        close(fd);
 }
 
 void Fifo::deleteFifo() {
+    close(fd);
+    fd = -1;
     unlink(path_name.c_str());
 }
