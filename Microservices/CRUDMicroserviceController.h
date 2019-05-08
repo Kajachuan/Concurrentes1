@@ -88,7 +88,7 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
                 }
                 size_t total_size = response_message.get_bytes_size() + sizeof(int);
                 char serialized_message[total_size];
-                requestMessage.serialize_with_size(serialized_message, total_size);
+	            response_message.serialize_with_size(serialized_message, total_size);
                 responseFifos[requestMessage.responseFifoPath]->write_fifo(static_cast<const void *>(serialized_message), total_size);
                 logger->logMessage(DEBUG, "Sending response: " + response_message.asString());
             }

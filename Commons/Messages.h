@@ -100,6 +100,7 @@ struct ExchangeRecord {
     void serialize(char* serialized) {
         float* float_serialized = (float*) serialized;
         *float_serialized = exchange;
+	    float_serialized++;
         char* char_serialized = (char*) float_serialized;
         for (int i = 0; i < strlen(code); i++) {
             *char_serialized = code[i];

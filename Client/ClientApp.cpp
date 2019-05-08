@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
                             continue;
                         }
                         if (message.instanceType == WEATHER_MICROSERVICE) {
-                            std::string temperature, pressure, humidity;
+                            std::string temperature, pressure, humidity, name;
                             while (true) {
                                 try {
                                     std::cout << "Insert temperature: ";
@@ -76,10 +76,10 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                             std::cout << "Insert name: ";
-                            std::cin >> humidity;
-                            std::strcpy(message.exchangeRecord.name, humidity.c_str());
+                            std::cin >> name;
+                            std::strcpy(message.exchangeRecord.name, name.c_str());
                         } else {
-                            std::string exchange;
+                            std::string exchange, name;
                             while (true) {
                                 try {
                                     std::cout << "Insert exchange: ";
@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                             std::cout << "Insert name: ";
-                            std::cin >> exchange;
-                            std::strcpy(message.exchangeRecord.name, exchange.c_str());
+                            std::cin >> name;
+                            std::strcpy(message.exchangeRecord.name, name.c_str());
                         }
                     }
                     std::cout << message.asString() << std::endl;
