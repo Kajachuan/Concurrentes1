@@ -56,15 +56,19 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
     ssize_t readedBytes = requestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
     if (readedBytes > 0) {
         logger->logMessage(DEBUG, "Received request: " + requestMessage.asString());
+        if (requestMessage.closeConnection) {
+            logger->logMessage(DEBUG, "Closing response fifo: " + std::string(requestMessage.responseFifoPath));
+            delete responseFifos[requestMessage.responseFifoPath];
+            responseFifos.erase(requestMessage.responseFifoPath);
+            return true;
+        }
         if (responseFifos.count(requestMessage.responseFifoPath) == 0) {
             logger->logMessage(DEBUG, "Creating new response fifo: " + std::string(requestMessage.responseFifoPath));
             responseFifos[requestMessage.responseFifoPath] = new FifoWriter(requestMessage.responseFifoPath);
             responseFifos[requestMessage.responseFifoPath]->open_fifo();
         }
         if (requestMessage.closeConnection) {
-            logger->logMessage(DEBUG, "Closing response fifo: " + std::string(requestMessage.responseFifoPath));
-            delete responseFifos[requestMessage.responseFifoPath];
-            responseFifos.erase(requestMessage.responseFifoPath);
+
         } else {
             PortalResponse response_message{};
             response_message.found = false;
@@ -93,8 +97,10 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
 template <class DataRecord>
 std::list<DataRecord> CRUDMicroserviceController<DataRecord>::getRecords() {
     std::list<DataRecord> records;
-    for (typename std::map<std::string, DataRecord>::iterator it = data.begin(); it != data.end(); ++it)
+    for (typename std::map<std::string, DataRecord>::iterator it = data.begin(); it != data.end(); ++it) {
+        strcpy(it->second.code, it->first.c_str());
         records.push_back(it->second);
+    }
     return records;
 }
 

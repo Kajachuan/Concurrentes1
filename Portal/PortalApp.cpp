@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
     while (processResult and sigintShutdownHandler.getGracefulQuit() != 1) {
         processResult = portal.processConnectionRequests();
     }
-    if (processResult < 0 and sigintShutdownHandler.getGracefulQuit() == 1) {
+    if (processResult < 0 or sigintShutdownHandler.getGracefulQuit() == 1) {
         portal.endPortal();
     }
     Logger::endLogger();
