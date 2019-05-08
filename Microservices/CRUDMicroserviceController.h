@@ -65,6 +65,7 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
                 logger->logMessage(DEBUG, "Closing response fifo: " + std::string(requestMessage.responseFifoPath));
                 delete responseFifos[requestMessage.responseFifoPath];
                 responseFifos.erase(requestMessage.responseFifoPath);
+                return true;
             }
             if (responseFifos.count(requestMessage.responseFifoPath) == 0) {
                 logger->logMessage(DEBUG, "Creating new response fifo: " + std::string(requestMessage.responseFifoPath));
