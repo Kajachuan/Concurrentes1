@@ -19,5 +19,6 @@ MicroserviceController::MicroserviceController(std::string registerRequestFifoPa
 }
 
 MicroserviceController::~MicroserviceController() {
+    requestFifo->deleteFifo();
     delete requestFifo;
 }

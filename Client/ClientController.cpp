@@ -35,6 +35,7 @@ ClientController::~ClientController() {
     MSRequest requestMessage{};
     requestMessage.closeConnection = true;
     requestFifo->write_fifo(static_cast<const void *>(&requestMessage), sizeof(requestMessage));
+    responseFifo->deleteFifo();
     delete responseFifo;
     delete requestFifo;
 }

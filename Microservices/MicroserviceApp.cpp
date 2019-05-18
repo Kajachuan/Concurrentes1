@@ -54,6 +54,7 @@ int main(int argc, char const *argv[]) {
         }
         new_records.close();
         logger.logMessage(DEBUG, "Finished saving DB");
+        delete msController;
     } else {
         CRUDMicroserviceController<ExchangeRecord> *msController;
         DataRecordManager<ExchangeRecord> *recordManager = new ExchangeRecordManager();
@@ -91,5 +92,6 @@ int main(int argc, char const *argv[]) {
         }
         new_records.close();
         logger.logMessage(DEBUG, "Finished saving DB");
+        delete msController;
     }
 }

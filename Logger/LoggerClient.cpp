@@ -34,6 +34,4 @@ void LoggerClient::logMessage(LogLevel logLevel, const std::string& message) {
 }
 
 
-LoggerClient::~LoggerClient() {
-    delete logWriter;
-}
+LoggerClient::~LoggerClient() {}

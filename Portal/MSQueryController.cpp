@@ -27,6 +27,7 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
 }
 
 MSQueryController::~MSQueryController(){
+    clientRequestFifo->deleteFifo();
     delete clientResponseFifo;
     delete clientRequestFifo;
     delete servicesResponseFifo;

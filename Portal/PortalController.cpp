@@ -15,6 +15,7 @@ PortalController::PortalController(std::string connectionRequestFifoPath) {
 }
 
 PortalController::~PortalController(){
+    connectionRequestFifo->deleteFifo();
     delete connectionRequestFifo;
 }
 
