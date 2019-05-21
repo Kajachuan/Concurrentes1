@@ -2,11 +2,11 @@
 #include "MicroserviceController.h"
 #include "../Commons/Messages.h"
 
-Logger *MicroserviceController::logger = Logger::getInstance("MicroserviceController");
+LoggerClient MicroserviceController::logger = LoggerClient("MicroserviceController");
 
 MicroserviceController::MicroserviceController(std::string registerRequestFifoPathName, std::string requestFifoPathName,
                                                INSTANCE_TYPE instanceType) {
-    logger->logMessage(DEBUG, "Connecting to the fifo to register MS to portal: "+ registerRequestFifoPathName);
+    logger.logMessage(DEBUG, "Connecting to the fifo to register MS to portal: "+ registerRequestFifoPathName);
     FifoWriter registerRequestFifo(registerRequestFifoPathName);
     registerRequestFifo.open_fifo();
     ConnectionRequest connectionRequest{"", instanceType};
@@ -16,11 +16,12 @@ MicroserviceController::MicroserviceController(std::string registerRequestFifoPa
     connectionRequest.serialize_with_size(serialized_message, total_size);
     registerRequestFifo.write_fifo(static_cast<const void *>(serialized_message), total_size);
 
-    logger->logMessage(DEBUG, "Opening request microservice fifo with path: " + requestFifoPathName);
+    logger.logMessage(DEBUG, "Opening request microservice fifo with path: " + requestFifoPathName);
     requestFifo = new FifoReader(requestFifoPathName);
     requestFifo->open_fifo();
 }
 
 MicroserviceController::~MicroserviceController() {
+    requestFifo->deleteFifo();
     delete requestFifo;
 }

@@ -2,7 +2,7 @@
 #include "FifoWriter.h"
 #include "../../Exceptions/FileExistsException.h"
 
-FifoWriter::FifoWriter(const std::string path_name) : Fifo(path_name) {
+FifoWriter::FifoWriter(std::string path_name) : Fifo(path_name) {
 }
 
 FifoWriter::~FifoWriter() = default;

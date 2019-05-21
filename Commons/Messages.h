@@ -136,7 +136,7 @@ struct PortalResponse {
                 break;
             }
             default:
-                response_message << "Unexpected instance type" << std::endl;
+                response_message << "Unexpected logWriter type" << std::endl;
                 break;
         }
         return response_message.str();

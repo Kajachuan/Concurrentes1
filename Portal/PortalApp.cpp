@@ -2,13 +2,14 @@
 #include "PortalController.h"
 #include "../IPC/Signal/SIGINTShutdownHandler.h"
 #include "../IPC/Signal/SignalHandler.h"
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 
 int main(int argc, char const *argv[]) {
-    auto logger = Logger::getInstance("portal main");
-    Logger::setLogLevel(DEBUG);
+    auto logger = LoggerClient("portal main");
+    char pidText[10];
+    snprintf(pidText, sizeof(pidText), "%d", getpid());
+    logger.logMessage(INFO, std::string("Start portal app with pid: ") + pidText);
     auto portal = PortalController("/tmp/register-portal");
-    logger->logMessage(DEBUG, "Start processing");
     SIGINTShutdownHandler sigintShutdownHandler;
     SignalHandler::getInstance()->registerHandler(SIGINT, &sigintShutdownHandler);
     int processResult = 1;
@@ -18,5 +19,4 @@ int main(int argc, char const *argv[]) {
     if (processResult < 0 or sigintShutdownHandler.getGracefulQuit() == 1) {
         portal.endPortal();
     }
-    Logger::endLogger();
 }

@@ -6,7 +6,7 @@
 #include "../IPC/Fifo/FifoReader.h"
 #include "../IPC/Fifo/FifoWriter.h"
 #include "../Commons/Messages.h"
-#include "../Logger/Logger.h"
+#include "../Logger/LoggerClient.h"
 
 class MSQueryController {
 public:
@@ -19,7 +19,7 @@ public:
 
 private:
     PortalResponse getMSResponse(MSRequest);
-    static Logger *logger;
+    static LoggerClient logger;
     FifoReader *clientRequestFifo;
     FifoWriter *clientResponseFifo;
     FifoReader *servicesResponseFifo;
