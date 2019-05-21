@@ -60,7 +60,7 @@ bool CRUDMicroserviceController<DataRecord>::processRequest() {
         readBytes = requestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
         if (readBytes > 0) {
 	        requestMessage.deserialize(serialized, message_size);
-            logger->logMessage(DEBUG, "Received request: " + requestMessage.asString());
+            logger.logMessage(DEBUG, "Received request: " + requestMessage.asString());
             if (requestMessage.closeConnection) {
                 logger.logMessage(DEBUG, "Closing response fifo: " + std::string(requestMessage.responseFifoPath));
                 delete responseFifos[requestMessage.responseFifoPath];
