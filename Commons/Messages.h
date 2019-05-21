@@ -47,41 +47,29 @@ struct WeatherRecord {
         *floated_serialized = humidity;
         floated_serialized++;
         char* char_serialized = (char*) floated_serialized;
-        for (int i = 0; i < 3; i++) {
-            *char_serialized = code[i];
-            char_serialized++;
-        }
-        for (int i = 0; i < strlen(name); i++) {
-            *char_serialized = name[i];
-            char_serialized++;
-        }
+	    strcpy(char_serialized, code);
+	    strcpy(&char_serialized[3], name);
     }
 
     void deserialize(const char* serialized, int total_size) {
         float* floated_serialized = (float*) serialized;
         temperature = *floated_serialized;
         floated_serialized++;
-        total_size -= sizeof(float);
         pressure = *floated_serialized;
         floated_serialized++;
-        total_size -= sizeof(float);
         humidity = *floated_serialized;
         floated_serialized++;
-        total_size -= sizeof(float);
         char* char_serialized = (char*) floated_serialized;
-        for (int i = 0; i < 3; i++) {
-            code[i] = *char_serialized;
-            char_serialized++;
-        }
-        total_size -= sizeof(char) * 3;
-        for (int i = 0; i < total_size; i++) {
-            name[i] = *char_serialized;
-            char_serialized++;
-        }
+	    for (int i = 0; i < 3; i++) {
+		    code[i] = char_serialized[i];
+	    }
+	    for (int i = 0; i < 20; i++) {
+		    name[i] = char_serialized[3 + i];
+	    }
     }
 
     size_t get_bytes_size() {
-        return sizeof(float) * 3 + strlen(code) * sizeof(char) + strlen(name) * sizeof(char);
+        return sizeof(float) * 3 + 3 * sizeof(char) + 20 * sizeof(char);
     }
 
 };
@@ -102,35 +90,25 @@ struct ExchangeRecord {
         *float_serialized = exchange;
 	    float_serialized++;
         char* char_serialized = (char*) float_serialized;
-        for (int i = 0; i < 3; i++) {
-            *char_serialized = code[i];
-            char_serialized++;
-        }
-        for (int i = 0; i < strlen(name); i++) {
-            *char_serialized = name[i];
-            char_serialized++;
-        }
+	    strcpy(char_serialized, code);
+	    strcpy(&char_serialized[3], name);
     }
 
     void deserialize(const char* serialized, int total_size) {
         float* floated_serialized = (float*) serialized;
         exchange = *floated_serialized;
         floated_serialized++;
-        total_size -= sizeof(float);
         char* char_serialized = (char*) floated_serialized;
-        for (int i = 0; i < 3; i++) {
-            code[i] = *char_serialized;
-            char_serialized++;
-        }
-        total_size -= sizeof(char) * 3;
-        for (int i = 0; i < total_size; i++) {
-            name[i] = *char_serialized;
-            char_serialized++;
-        }
+	    for (int i = 0; i < 3; i++) {
+		    code[i] = char_serialized[i];
+	    }
+	    for (int i = 0; i < 20; i++) {
+		    name[i] = char_serialized[3 + i];
+	    }
     }
 
     size_t get_bytes_size() {
-        return sizeof(float) + strlen(code) * sizeof(char) + strlen(name) * sizeof(char);
+        return sizeof(float) + 3 * sizeof(char) + 20 * sizeof(char);
     }
 };
 
@@ -192,14 +170,11 @@ struct PortalResponse {
         INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
         instanceType = *enum_serialized;
         enum_serialized++;
-        total_size -= sizeof(INSTANCE_TYPE);
         bool* bool_serialized = (bool*) enum_serialized;
         found = *bool_serialized;
         bool_serialized++;
-        total_size -= sizeof(bool);
         requestError = *bool_serialized;
         bool_serialized++;
-        total_size -= sizeof(bool);
         char* char_serialized = (char*) bool_serialized;
         switch(instanceType) {
             case WEATHER_MICROSERVICE: {
@@ -281,25 +256,16 @@ struct MSRequest {
         bool* bool_serialized = (bool*) type_serialized;
         *bool_serialized = closeConnection;
         bool_serialized++;
-        int* int_serialized = (int*) bool_serialized;
-        *int_serialized = static_cast<int>(strlen(responseFifoPath));
-        int_serialized++;
-        char* char_serialized = (char*) int_serialized;
-        for (int i = 0; i < strlen(responseFifoPath); i++) {
-            *char_serialized = responseFifoPath[i];
-            char_serialized++;
-        }
-        for (int i = 0; i < strlen(code); i++) {
-            *char_serialized = code[i];
-            char_serialized++;
-        }
+        char* char_serialized = (char*) bool_serialized;
+	    strcpy(char_serialized, responseFifoPath);
+	    strcpy(&char_serialized[50], code);
         switch(instanceType) {
             case WEATHER_MICROSERVICE: {
-                weatherRecord.serialize(char_serialized);
+                weatherRecord.serialize(&char_serialized[53]);
                 break;
             }
             case EXCHANGE_MICROSERVICE: {
-                exchangeRecord.serialize(char_serialized);
+                exchangeRecord.serialize(&char_serialized[53]);
                 break;
             }
             default:
@@ -320,28 +286,21 @@ struct MSRequest {
         closeConnection = *bool_serialized;
         bool_serialized++;
         total_size -= sizeof(bool);
-        int* int_serialized = (int*) bool_serialized;
-        int responseFifoPathLength = *int_serialized;
-        int_serialized++;
-        total_size -= sizeof(int);
-        char* char_serialized = (char*) int_serialized;
-        for (int i = 0; i < responseFifoPathLength; i++) {
-            responseFifoPath[i] = *char_serialized;
-            char_serialized++;
+        char* char_serialized = (char*) bool_serialized;
+	    for (int i = 0; i < 50; i++) {
+            responseFifoPath[i] = char_serialized[i];
         }
-        total_size -= responseFifoPathLength * sizeof(char);
         for (int i = 0; i < 3; i++) {
-            code[i] = *char_serialized;
-            char_serialized++;
+            code[i] = char_serialized[50 + i];
         }
         total_size -= 3 * sizeof(char);
         switch(instanceType) {
             case WEATHER_MICROSERVICE: {
-                weatherRecord.deserialize(char_serialized, total_size);
+                weatherRecord.deserialize(&char_serialized[53], total_size);
                 break;
             }
             case EXCHANGE_MICROSERVICE: {
-                exchangeRecord.deserialize(char_serialized, total_size);
+                exchangeRecord.deserialize(&char_serialized[53], total_size);
                 break;
             }
             default:
@@ -350,8 +309,8 @@ struct MSRequest {
     }
 
     size_t get_bytes_size() {
-        size_t common_size = sizeof(Method) + sizeof(INSTANCE_TYPE) + sizeof(char) * strlen(responseFifoPath) +
-                             sizeof(char) * strlen(code) + sizeof(bool);
+        size_t common_size = sizeof(Method) + sizeof(INSTANCE_TYPE) + sizeof(char) * 50 +
+                             sizeof(char) * 3 + sizeof(bool);
         size_t instance_size;
         switch(instanceType) {
             case WEATHER_MICROSERVICE: {
@@ -387,26 +346,21 @@ struct ConnectionRequest {
         *enum_serialized = instanceType;
         enum_serialized++;
         char* char_serialized = (char*) enum_serialized;
-        for (int i = 0; i < strlen(senderResponseFifoPath); i++) {
-            *char_serialized = senderResponseFifoPath[i];
-            char_serialized++;
-        }
+	    strcpy(char_serialized, senderResponseFifoPath);
     }
 
     void deserialize(char* serialized, int total_size) {
         INSTANCE_TYPE* enum_serialized = (INSTANCE_TYPE*) serialized;
         instanceType = *enum_serialized;
         enum_serialized++;
-        total_size -= sizeof(INSTANCE_TYPE);
         char* char_serialized = (char*) enum_serialized;
-        for (int i = 0; i < total_size; i++) {
-            senderResponseFifoPath[i] = *char_serialized;
-            char_serialized++;
+        for (int i = 0; i < 50; i++) {
+            senderResponseFifoPath[i] = char_serialized[i];
         }
     }
 
     size_t get_bytes_size() {
-        return sizeof(INSTANCE_TYPE) + sizeof(char) * strlen(senderResponseFifoPath);
+        return sizeof(INSTANCE_TYPE) + sizeof(char) * 50;
     }
 
     void serialize_with_size(char* serialized, size_t size) {
