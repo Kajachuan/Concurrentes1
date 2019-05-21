@@ -53,43 +53,50 @@ template <class DataRecord>
 bool CRUDMicroserviceController<DataRecord>::processRequest() {
     logger.logMessage(DEBUG, "Reading request fifo");
     MSRequest requestMessage{};
-    ssize_t readedBytes = requestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
-    if (readedBytes > 0) {
-        logger.logMessage(DEBUG, "Received request: " + requestMessage.asString());
-        if (requestMessage.closeConnection) {
-            logger.logMessage(DEBUG, "Closing response fifo: " + std::string(requestMessage.responseFifoPath));
-            delete responseFifos[requestMessage.responseFifoPath];
-            responseFifos.erase(requestMessage.responseFifoPath);
-            return true;
-        }
-        if (responseFifos.count(requestMessage.responseFifoPath) == 0) {
-            logger.logMessage(DEBUG, "Creating new response fifo: " + std::string(requestMessage.responseFifoPath));
-            responseFifos[requestMessage.responseFifoPath] = new FifoWriter(requestMessage.responseFifoPath);
-            responseFifos[requestMessage.responseFifoPath]->open_fifo();
-        }
-        if (requestMessage.closeConnection) {
-
-        } else {
-            PortalResponse response_message{};
-            response_message.found = false;
-            response_message.instanceType = dataRecordManager->getServiceName();
-            if (requestMessage.method == READ) {
-                logger.logMessage(DEBUG, std::string("Reading: ") + requestMessage.code);
-                if (data.count(requestMessage.code) > 0) {
+    int message_size;
+    ssize_t readBytes = requestFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
+    if (readBytes > 0) {
+        char serialized[message_size];
+        readBytes = requestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
+        if (readBytes > 0) {
+	        requestMessage.deserialize(serialized, message_size);
+            logger.logMessage(DEBUG, "Received request: " + requestMessage.asString());
+            if (requestMessage.closeConnection) {
+                logger.logMessage(DEBUG, "Closing response fifo: " + std::string(requestMessage.responseFifoPath));
+                delete responseFifos[requestMessage.responseFifoPath];
+                responseFifos.erase(requestMessage.responseFifoPath);
+                return true;
+            }
+            if (responseFifos.count(requestMessage.responseFifoPath) == 0) {
+                logger.logMessage(DEBUG, "Creating new response fifo: " + std::string(requestMessage.responseFifoPath));
+                responseFifos[requestMessage.responseFifoPath] = new FifoWriter(requestMessage.responseFifoPath);
+                responseFifos[requestMessage.responseFifoPath]->open_fifo();
+            }
+            if (requestMessage.closeConnection) {
+            } else {
+                PortalResponse response_message{};
+                response_message.found = false;
+                response_message.instanceType = dataRecordManager->getServiceName();
+                if (requestMessage.method == READ) {
+                    logger.logMessage(DEBUG, std::string("Reading: ") + requestMessage.code);
+                    if (data.count(requestMessage.code) > 0) {
+                        response_message.found = true;
+                        dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
+                    }
+                } else {
+                    logger.logMessage(DEBUG, std::string("Writing: ") + requestMessage.code);
+                    addRecord(requestMessage.code, dataRecordManager->getRecordFromRequest(requestMessage));
                     response_message.found = true;
                     dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
                 }
-            } else {
-                logger.logMessage(DEBUG, std::string("Writing: ") + requestMessage.code);
-                addRecord(requestMessage.code, dataRecordManager->getRecordFromRequest(requestMessage));
-                response_message.found = true;
-                dataRecordManager->setRecordToResponse(&response_message, data[requestMessage.code]);
+                size_t total_size = response_message.get_bytes_size() + sizeof(int);
+                char serialized_message[total_size];
+	            response_message.serialize_with_size(serialized_message, total_size);
+                responseFifos[requestMessage.responseFifoPath]->write_fifo(static_cast<const void *>(serialized_message), total_size);
+                logger.logMessage(DEBUG, "Sending response: " + response_message.asString());
             }
-            responseFifos[requestMessage.responseFifoPath]->write_fifo(static_cast<const void *>(&response_message),
-                                                                       sizeof(PortalResponse));
-            logger.logMessage(DEBUG, "Sending response: " + response_message.asString());
+            return requestMessage.closeConnection;
         }
-        return requestMessage.closeConnection;
     }
     return false;
 }

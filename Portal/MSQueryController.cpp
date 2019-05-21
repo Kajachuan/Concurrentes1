@@ -19,7 +19,10 @@ MSQueryController::MSQueryController(std::string clientRequestFifoPath, std::str
     clientResponseFifo->open_fifo();
     ConnectionRequest connectionRequest{"", MS_QUERY_CONTROLLER};
     std::strcpy(connectionRequest.senderResponseFifoPath, clientRequestFifoPath.c_str());
-    clientResponseFifo->write_fifo(static_cast<void *>(&connectionRequest), sizeof(ConnectionRequest));
+    size_t total_size = connectionRequest.get_bytes_size() + sizeof(int);
+    char serialized_message[total_size];
+    connectionRequest.serialize_with_size(serialized_message, total_size);
+    clientResponseFifo->write_fifo(static_cast<const void *>(serialized_message), total_size);
 
     logger.logMessage(DEBUG, "Waiting for the client to connect " + clientRequestFifoPath);
     clientRequestFifo = new FifoReader(clientRequestFifoPath);
@@ -35,12 +38,23 @@ MSQueryController::~MSQueryController(){
 
 bool MSQueryController::process_requests() {
     MSRequest requestMessage{};
-    ssize_t readBytes = clientRequestFifo->read_fifo(static_cast<void *>(&requestMessage), sizeof(MSRequest));
-    if (readBytes > 0 and !requestMessage.closeConnection) {
-        logger.logMessage(DEBUG, "Read request message: " + requestMessage.asString());
-        PortalResponse msResponse = getMSResponse(requestMessage);
-        logger.logMessage(DEBUG, "Writing response to client: " + msResponse.asString());
-        clientResponseFifo->write_fifo(static_cast<const void *>(&msResponse), sizeof(PortalResponse));
+    int message_size;
+    ssize_t readBytes = clientRequestFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
+    if (readBytes > 0) {
+        char serialized[message_size];
+        readBytes = clientRequestFifo->read_fifo(static_cast<void *>(serialized), static_cast<size_t>(message_size));
+        if (readBytes > 0) {
+            requestMessage.deserialize(serialized, message_size);
+            if (!requestMessage.closeConnection) {
+                logger.logMessage(DEBUG, "Read request message: " + requestMessage.asString());
+                PortalResponse msResponse = getMSResponse(requestMessage);
+                logger.logMessage(DEBUG, "Writing response to client: " + msResponse.asString());
+                size_t total_size = msResponse.get_bytes_size() + sizeof(int);
+                char serialized_message[total_size];
+                msResponse.serialize_with_size(serialized_message, total_size);
+                clientResponseFifo->write_fifo(static_cast<const void *>(serialized_message), total_size);
+            }
+        }
     }
     return requestMessage.closeConnection;
 }
@@ -54,8 +68,11 @@ PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
         strcpy(requestMessage.responseFifoPath, servicesResponseFifoPath.c_str());
         requestMessage.closeConnection = false;
         logger.logMessage(DEBUG, "Sending request to microservice: " + requestMessage.asString());
-        servicesRequestFifos[requestMessage.instanceType]->write_fifo(static_cast<void *>(&requestMessage),
-                                                                      sizeof(MSRequest));
+        size_t total_size = requestMessage.get_bytes_size() + sizeof(int);
+        char serialized_message[total_size];
+        requestMessage.serialize_with_size(serialized_message, total_size);
+        servicesRequestFifos[requestMessage.instanceType]->write_fifo(static_cast<const void *>
+                                                                     (serialized_message), total_size);
 
         if (servicesResponseFifo == nullptr) {
             logger.logMessage(DEBUG, "Opening response fifo for ms with path: " + servicesResponseFifoPath);
@@ -64,10 +81,16 @@ PortalResponse MSQueryController::getMSResponse(MSRequest requestMessage) {
         }
 
         logger.logMessage(DEBUG, "Reading response fifo from ms");
-        ssize_t readedBytes = servicesResponseFifo->read_fifo(static_cast<void *>(&responseMessage),
-                                                              sizeof(PortalResponse));
-        if (readedBytes > 0) {
-            logger.logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
+        int message_size;
+        ssize_t readBytes = servicesResponseFifo->read_fifo(static_cast<void *>(&message_size), sizeof(int));
+        if (readBytes > 0) {
+            char serialized[message_size];
+            readBytes = servicesResponseFifo->read_fifo(static_cast<void *>(serialized),
+                                                        static_cast<size_t>(message_size));
+            if (readBytes > 0) {
+	            responseMessage.deserialize(serialized, message_size);
+                logger.logMessage(DEBUG, "Received response from ms: " + responseMessage.asString());
+            }
         }
     }
     return responseMessage;
